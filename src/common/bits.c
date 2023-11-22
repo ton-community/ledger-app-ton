@@ -1,13 +1,13 @@
-#include <stddef.h>   // size_t
-#include <stdint.h>   // uint*_t
-#include <stdbool.h>  // bool
-#include <string.h>   // explicit_bzero
+#include <stdint.h>  // uint*_t
+#include <string.h>  // explicit_bzero
 
 #include "bits.h"
+#include "../constants.h"
+#include "cell.h"
 
 void BitString_init(BitString_t* self) {
     self->data_cursor = 0;
-    explicit_bzero(self->data, 128);
+    explicit_bzero(self->data, sizeof(self->data));
 }
 
 void BitString_storeBit(BitString_t* self, int8_t v) {
@@ -50,6 +50,14 @@ void BitString_storeCoins(BitString_t* self, uint64_t v) {
     }
 }
 
+void BitString_storeCoinsBuf(BitString_t* self, uint8_t* v, uint8_t len) {
+    // Write length
+    BitString_storeUint(self, len, 4);
+
+    // Write remaining
+    BitString_storeBuffer(self, v, len);
+}
+
 void BitString_storeBuffer(BitString_t* self, uint8_t* v, uint8_t length) {
     for (int i = 0; i < length; i++) {
         BitString_storeUint(self, v[i], 8);
@@ -59,8 +67,8 @@ void BitString_storeBuffer(BitString_t* self, uint8_t* v, uint8_t length) {
 void BitString_storeAddress(BitString_t* self, uint8_t chain, uint8_t* hash) {
     BitString_storeUint(self, 2, 2);
     BitString_storeUint(self, 0, 1);
-    BitString_storeUint(self, chain, 8);
-    BitString_storeBuffer(self, hash, 32);
+    BitString_storeUint(self, chain, CHAIN_LEN * 8);
+    BitString_storeBuffer(self, hash, HASH_LEN);
 }
 
 void BitString_storeAddressNull(BitString_t* self) {

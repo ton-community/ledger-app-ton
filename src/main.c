@@ -17,6 +17,7 @@
 
 #include <stdint.h>  // uint*_t
 #include <string.h>  // memset, explicit_bzero
+#include <stdbool.h>
 
 #include "os.h"
 #include "ux.h"
@@ -34,6 +35,17 @@ io_state_e G_io_state;
 ux_state_t G_ux;
 bolos_ux_params_t G_ux_params;
 global_ctx_t G_context;
+
+const internalStorage_t N_storage_real;
+
+void nv_init() {
+    if (!N_storage.initialized) {
+        internalStorage_t storage;
+        storage.initialized = true;
+        storage.expert_mode = false;
+        nvm_write((void *) &N_storage, (void *) &storage, sizeof(internalStorage_t));
+    }
+}
 
 /**
  * Handle APDU command received and send back APDU response using handlers.
@@ -126,9 +138,11 @@ __attribute__((section(".boot"))) int main() {
             TRY {
                 io_seproxyhal_init();
 
-#ifdef TARGET_NANOX
+                nv_init();
+
+#ifdef HAVE_BLE
                 G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
-#endif  // TARGET_NANOX
+#endif  // HAVE_BLE
 
                 USB_power(0);
                 USB_power(1);
@@ -137,7 +151,7 @@ __attribute__((section(".boot"))) int main() {
 
 #ifdef HAVE_BLE
                 BLE_power(0, NULL);
-                BLE_power(1, "Nano X");
+                BLE_power(1, NULL);
 #endif  // HAVE_BLE
                 app_main();
             }

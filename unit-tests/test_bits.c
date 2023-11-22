@@ -79,8 +79,53 @@ static void test_bits_2(void **state) {
     assert_memory_equal(bits.data, expected, sizeof(expected));
 }
 
+static void test_coins_buf(void **state) {
+    uint8_t expected[8] = {
+        0x07, 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xde
+    };
+    BitString_t bits;
+    BitString_init(&bits);
+    BitString_storeUint(&bits, 0, 4); // align the coins
+    uint8_t coins[7] = { 0x01, 0x23, 0x45, 0x67, 0x89, 0xab, 0xde };
+    BitString_storeCoinsBuf(&bits, coins, sizeof(coins));
+    BitString_finalize(&bits);
+    assert_int_equal(bits.data_cursor, 8 * sizeof(expected));
+    assert_memory_equal(bits.data, expected, sizeof(expected));
+}
+
+static void test_null_addr(void **state) {
+    uint8_t expected[1] = {
+        0x20
+    };
+    BitString_t bits;
+    BitString_init(&bits);
+    BitString_storeAddressNull(&bits);
+    BitString_finalize(&bits);
+    assert_int_equal(bits.data_cursor, 8);
+    assert_memory_equal(bits.data, expected, sizeof(expected));
+}
+
+static void test_addr(void **state) {
+    uint8_t expected[34] = { 0 };
+    expected[0] = 0x80;
+    expected[33] = 0x10;
+    uint8_t hash[32] = { 0 };
+    BitString_t bits;
+    BitString_init(&bits);
+    BitString_storeAddress(&bits, 0x00, hash);
+    BitString_finalize(&bits);
+    assert_int_equal(bits.data_cursor, 8 * sizeof(expected));
+    assert_memory_equal(bits.data, expected, sizeof(expected));
+}
+
 int main() {
-    const struct CMUnitTest tests[] = {cmocka_unit_test(test_bits),cmocka_unit_test(test_bits_2)};
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_bits),
+        cmocka_unit_test(test_bits_2),
+        cmocka_unit_test(test_coins_buf),
+        cmocka_unit_test(test_null_addr),
+        cmocka_unit_test(test_addr)
+    };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

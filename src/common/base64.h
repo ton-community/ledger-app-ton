@@ -20,4 +20,4 @@
  * @return number of bytes encoded, -1 otherwise.
  *
  */
-size_t base64_encode(const uint8_t *data, size_t data_length, char *out, size_t out_len);
+int base64_encode(const uint8_t *data, size_t data_length, char *out, size_t out_len);

@@ -124,12 +124,100 @@ static void test_buffer_move(void **state) {
     assert_false(buffer_move(&buf, output2, sizeof(output2)));  // can't read 5 bytes
 }
 
+static void test_buffer_read_bool(void **state) {
+    (void) state;
+
+    bool res;
+    uint8_t temp[1] = {0x00};
+    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+
+    assert_true(buffer_read_bool(&buf, &res));
+    assert_false(res);
+
+    assert_true(buffer_seek_set(&buf, 0));
+
+    temp[0] = 0x01;
+
+    assert_true(buffer_read_bool(&buf, &res));
+    assert_true(res);
+
+    assert_false(buffer_read_bool(&buf, &res));
+    assert_false(res);
+
+    assert_true(buffer_seek_set(&buf, 0));
+
+    temp[0] = 0xdf;
+
+    assert_false(buffer_read_bool(&buf, &res));
+    assert_false(res);
+}
+
+static void test_buffer_read_bip32(void **state) {
+    (void) state;
+
+    uint32_t out[2] = { 0 };
+    uint8_t temp[8] = {0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x02};
+    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+
+    assert_true(buffer_read_bip32_path(&buf, out, 2));
+    assert_int_equal(out[0], 1);
+    assert_int_equal(out[1], 2);
+}
+
+static void test_buffer_read_ref(void **state) {
+    (void) state;
+
+    uint8_t* ref;
+    uint8_t throwaway;
+    uint8_t temp[3] = {0x01, 0x23, 0x45};
+    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+
+    assert_true(buffer_read_u8(&buf, &throwaway));
+    assert_true(buffer_read_ref(&buf, &ref, 2));
+    assert_ptr_equal(ref, &temp[1]);
+}
+
+static void test_buffer_read_buffer(void **state) {
+    (void) state;
+
+    uint8_t out[2] = { 0 };
+    uint8_t throwaway;
+    uint8_t temp[3] = {0x01, 0x23, 0x45};
+    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+
+    assert_true(buffer_read_u8(&buf, &throwaway));
+    assert_true(buffer_read_buffer(&buf, out, sizeof(out)));
+    assert_memory_equal(out, &temp[1], sizeof(out));
+}
+
+static void test_buffer_read_varuint(void **state) {
+    (void) state;
+
+    uint8_t out[3] = { 0 };
+    uint8_t out_size;
+    uint8_t temp[5] = {0x02, 0x23, 0x45, 0x02, 0x00};
+    buffer_t buf = {.ptr = temp, .size = sizeof(temp), .offset = 0};
+
+    assert_true(buffer_read_varuint(&buf, &out_size, out, sizeof(out)));
+    assert_int_equal(out_size, 2);
+    assert_memory_equal(out, &temp[1], out_size);
+
+    assert_false(buffer_read_varuint(&buf, &out_size, out, sizeof(out)));
+}
+
 int main() {
-    const struct CMUnitTest tests[] = {cmocka_unit_test(test_buffer_can_read),
-                                       cmocka_unit_test(test_buffer_seek),
-                                       cmocka_unit_test(test_buffer_read),
-                                       cmocka_unit_test(test_buffer_copy),
-                                       cmocka_unit_test(test_buffer_move)};
+    const struct CMUnitTest tests[] = {
+        cmocka_unit_test(test_buffer_can_read),
+        cmocka_unit_test(test_buffer_seek),
+        cmocka_unit_test(test_buffer_read),
+        cmocka_unit_test(test_buffer_copy),
+        cmocka_unit_test(test_buffer_move),
+        cmocka_unit_test(test_buffer_read_bool),
+        cmocka_unit_test(test_buffer_read_bip32),
+        cmocka_unit_test(test_buffer_read_ref),
+        cmocka_unit_test(test_buffer_read_buffer),
+        cmocka_unit_test(test_buffer_read_varuint)
+    };
 
     return cmocka_run_group_tests(tests, NULL, NULL);
 }

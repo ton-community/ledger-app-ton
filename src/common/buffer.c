@@ -22,9 +22,10 @@
 #include "buffer.h"
 #include "read.h"
 #include "bip32.h"
+#include "types.h"
 
 bool buffer_can_read(const buffer_t *buffer, size_t n) {
-    return buffer->size - buffer->offset >= n;
+    return buffer_remaining(buffer) >= n;
 }
 
 bool buffer_seek_set(buffer_t *buffer, size_t offset) {
@@ -134,10 +135,7 @@ bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness)
 }
 
 bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len) {
-    if (!bip32_path_read(buffer->ptr + buffer->offset,
-                         buffer->size - buffer->offset,
-                         out,
-                         out_len)) {
+    if (!bip32_path_read(buffer->ptr + buffer->offset, buffer_remaining(buffer), out, out_len)) {
         return false;
     }
 
@@ -146,12 +144,16 @@ bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len) {
     return true;
 }
 
+size_t buffer_remaining(const buffer_t *buffer) {
+    return buffer->size - buffer->offset;
+}
+
 bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len) {
-    if (buffer->size - buffer->offset > out_len) {
+    if (buffer_remaining(buffer) > out_len) {
         return false;
     }
 
-    memmove(out, buffer->ptr + buffer->offset, buffer->size - buffer->offset);
+    memmove(out, buffer->ptr + buffer->offset, buffer_remaining(buffer));
 
     return true;
 }
@@ -161,7 +163,7 @@ bool buffer_move(buffer_t *buffer, uint8_t *out, size_t out_len) {
         return false;
     }
 
-    buffer_seek_cur(buffer, out_len);
+    buffer_seek_end(buffer, 0);
 
     return true;
 }
@@ -182,5 +184,40 @@ bool buffer_read_buffer(buffer_t *buffer, uint8_t *out, size_t out_len) {
     }
     memmove(out, buffer->ptr + buffer->offset, out_len);
     buffer_seek_cur(buffer, out_len);
+    return true;
+}
+
+bool buffer_read_varuint(buffer_t *buffer, uint8_t *out_size, uint8_t *out, size_t out_len) {
+    uint8_t size;
+    if (!buffer_read_u8(buffer, &size)) {
+        return false;
+    }
+    if (size > out_len) {
+        return false;
+    }
+    if (!buffer_read_buffer(buffer, out, size)) {
+        return false;
+    }
+    *out_size = size;
+    return true;
+}
+
+bool buffer_read_address(buffer_t *buf, address_t *out) {
+    if (!buffer_read_u8(buf, &out->chain)) {
+        return false;
+    }
+    if (!buffer_read_buffer(buf, out->hash, HASH_LEN)) {
+        return false;
+    }
+    return true;
+}
+
+bool buffer_read_cell_ref(buffer_t *buf, CellRef_t *out) {
+    if (!buffer_read_u16(buf, &out->max_depth, BE)) {
+        return false;
+    }
+    if (!buffer_read_buffer(buf, out->hash, HASH_LEN)) {
+        return false;
+    }
     return true;
 }

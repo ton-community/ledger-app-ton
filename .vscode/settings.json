@@ -4,8 +4,18 @@
         "system_error": "c",
         "array": "c",
         "string": "c",
-        "string_view": "c"
+        "string_view": "c",
+        "hash_map": "c",
+        "hash_set": "c",
+        "*.tcc": "c",
+        "unordered_map": "c",
+        "unordered_set": "c",
+        "vector": "c",
+        "functional": "c",
+        "memory": "c",
+        "optional": "c",
+        "thread": "c"
     },
     "C_Cpp.clang_format_path": "/usr/bin/clang-format",
-    "editor.formatOnSave": true
+    "editor.formatOnSave": false
 }

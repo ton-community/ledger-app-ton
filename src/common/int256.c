@@ -1,5 +1,9 @@
-#import "int256.h"
+#include <stdint.h>   // uint*_t
+#include <stddef.h>   // size_t
+#include <stdbool.h>  // bool
 #include <string.h>
+
+#include "int256.h"
 
 bool uint256_to_decimal(const uint8_t *value, size_t value_len, char *out, size_t out_len) {
     if (value_len > INT256_LENGTH) {

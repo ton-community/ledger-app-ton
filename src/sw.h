@@ -13,7 +13,7 @@
  */
 #define SW_WRONG_P1P2 0x6A86
 /**
- * Status word for either wrong Lc or lenght of APDU command less than 5.
+ * Status word for either wrong Lc or length of APDU command less than 5.
  */
 #define SW_WRONG_DATA_LENGTH 0x6A87
 /**
@@ -25,7 +25,7 @@
  */
 #define SW_CLA_NOT_SUPPORTED 0x6E00
 /**
- * Status word for wrong reponse length (buffer too small or too big).
+ * Status word for wrong response length (buffer too small or too big).
  */
 #define SW_WRONG_RESPONSE_LENGTH 0xB000
 /**
@@ -41,9 +41,17 @@
  */
 #define SW_WRONG_TX_LENGTH 0xB004
 /**
- * Status word for fail of transaction parsing.
+ * Status word for failure of transaction parsing.
  */
 #define SW_TX_PARSING_FAIL 0xB010
+/**
+ * Status word for wrong custom data length.
+ */
+#define SW_WRONG_SIGN_DATA_LENGTH 0xB005
+/**
+ * Status word for failure of custom data parsing.
+ */
+#define SW_SIGN_DATA_PARSING_FAIL 0xB011
 /**
  * Status word for bad state.
  */
@@ -52,3 +60,11 @@
  * Status word for signature fail.
  */
 #define SW_SIGNATURE_FAIL 0xB008
+/**
+ * Status word for a request that is too long.
+ */
+#define SW_REQUEST_TOO_LONG 0xB00B
+/**
+ * Status word for bad bip32 path.
+ */
+#define SW_BAD_BIP32_PATH 0xB0BD

@@ -1,12 +1,15 @@
+#include <stddef.h>  // size_t
+#include <stdint.h>  // uint*_t
+
 #include "base64.h"
 
 static const char base64_alphabet[] =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 static const size_t base64_mod_table[] = {0, 2, 1};
 
-size_t base64_encode(const uint8_t *data, size_t data_length, char *out, size_t out_len) {
-    size_t out_length = 4 * ((data_length + 2) / 3);
-    if (out_length + 1 > out_len) {
+int base64_encode(const uint8_t *data, size_t data_length, char *out, size_t out_len) {
+    int out_length = 4 * ((data_length + 2) / 3);
+    if (((size_t) out_length) + 1 > out_len) {
         return -1;
     }
     for (size_t i = 0, j = 0; i < data_length;) {

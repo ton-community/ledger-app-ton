@@ -16,9 +16,15 @@
  *****************************************************************************/
 
 #include <stdint.h>
+#include <string.h>
 
 #include "os.h"
 #include "ux.h"
+
+#ifdef HAVE_NBGL
+#include "nbgl_touch.h"
+#include "nbgl_page.h"
+#endif  // HAVE_NBGL
 
 #include "io.h"
 #include "globals.h"
@@ -28,14 +34,20 @@
 
 uint32_t G_output_len = 0;
 
+#ifdef HAVE_BAGL
 void io_seproxyhal_display(const bagl_element_t *element) {
-    io_seproxyhal_display_default((bagl_element_t *) element);
+    io_seproxyhal_display_default(element);
 }
+#endif  // HAVE_BAGL
 
-uint8_t io_event(uint8_t channel __attribute__((unused))) {
+uint8_t io_event(uint8_t channel) {
+    (void) channel;
+
     switch (G_io_seproxyhal_spi_buffer[0]) {
         case SEPROXYHAL_TAG_BUTTON_PUSH_EVENT:
+#ifdef HAVE_BAGL
             UX_BUTTON_PUSH_EVENT(G_io_seproxyhal_spi_buffer);
+#endif  // HAVE_BAGL
             break;
         case SEPROXYHAL_TAG_STATUS_EVENT:
             if (G_io_apdu_media == IO_APDU_MEDIA_USB_HID &&  //
@@ -44,9 +56,20 @@ uint8_t io_event(uint8_t channel __attribute__((unused))) {
                 THROW(EXCEPTION_IO_RESET);
             }
             /* fallthrough */
+            __attribute__((fallthrough));
         case SEPROXYHAL_TAG_DISPLAY_PROCESSED_EVENT:
+#ifdef HAVE_BAGL
             UX_DISPLAYED_EVENT({});
+#endif  // HAVE_BAGL
+#ifdef HAVE_NBGL
+            UX_DEFAULT_EVENT();
+#endif  // HAVE_NBGL
             break;
+#ifdef HAVE_NBGL
+        case SEPROXYHAL_TAG_FINGER_EVENT:
+            UX_FINGER_EVENT(G_io_seproxyhal_spi_buffer);
+            break;
+#endif  // HAVE_NBGL
         case SEPROXYHAL_TAG_TICKER_EVENT:
             UX_TICKER_EVENT(G_io_seproxyhal_spi_buffer, {});
             break;

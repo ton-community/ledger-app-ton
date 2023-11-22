@@ -3,11 +3,12 @@
 #include <stddef.h>   // size_t
 #include <stdint.h>   // uint*_t
 #include <stdbool.h>  // bool
-#include "cell.h"     // CellRef_t
 
-#define MAX_TX_LEN   510
-#define ADDRESS_LEN  36
-#define MAX_MEMO_LEN 465  // 510 - ADDRESS_LEN - 2*SIZE(U64) - SIZE(MAX_VARINT)
+#include "../constants.h"
+#include "../common/types.h"
+#include "../common/hints.h"
+
+#define MAX_MEMO_LEN 120
 
 typedef enum {
     PARSING_OK = 0,
@@ -25,54 +26,24 @@ typedef enum {
 } parser_status_e;
 
 typedef struct {
-    uint8_t chain;
-    uint8_t hash[32];
-} address_t;
-
-enum HintKind {
-    SummaryItemNone = 0,  // SummaryItemNone always zero
-    SummaryItemAmount,
-    SummaryItemU64,
-    SummaryItemString,
-    SummaryAddress,
-    SummaryHash
-};
-
-typedef struct {
-    char* string;
-    size_t length;
-} SizedString_t;
-
-typedef struct {
-    const char* title;
-    enum HintKind kind;
-    union {
-        uint64_t amount;
-        uint64_t u64;
-        SizedString_t string;
-        uint8_t hash[32];
-        address_t address;
-    };
-} Hint_t;
-
-typedef struct {
-    uint8_t tag;           // tag (1 byte)
-    uint32_t seqno;        // seqno (4 bytes)
-    uint32_t timeout;      // timeout (4 bytes)
-    uint64_t value;        // amount value (8 bytes)
-    uint8_t bounce;        // bounce (1 byte)
-    uint8_t send_mode;     // send_mode (1 byte)
-    address_t to;          // target
-    bool has_state_init;   // true if state_init exist
-    CellRef_t state_init;  // state_init if exist
-    bool has_payload;      // true if payload exist
-    CellRef_t payload;     // payload if exist
-    bool has_hints;        // true if payload exist
-    uint32_t hints_type;   // hints type if exist
-    uint16_t hints_len;    // hints len if exist
-    uint8_t* hints_data;   // hints data if exist
-    bool is_blind;         // Is transaction requires blind signing
-    Hint_t hints[8];
-    uint8_t hints_count;
-    char title[128];
+    uint8_t tag;                             // tag (1 byte)
+    uint32_t seqno;                          // seqno (4 bytes)
+    uint32_t timeout;                        // timeout (4 bytes)
+    uint8_t value_buf[MAX_VALUE_BYTES_LEN];  // big endian transaction value
+    uint8_t value_len;                       // length of transaction value
+    bool bounce;                             // bounce
+    uint8_t send_mode;                       // send_mode (1 byte)
+    address_t to;                            // receiver
+    bool has_state_init;                     // true if state_init exists
+    CellRef_t state_init;                    // state_init if exists
+    bool has_payload;                        // true if payload exists
+    CellRef_t payload;                       // payload if exists
+    bool has_hints;                          // true if hints exist
+    uint32_t hints_type;                     // hints type if exists
+    uint16_t hints_len;                      // hints len if exists
+    uint8_t* hints_data;                     // hints data if exists
+    HintHolder_t hints;
+    char title[32];
+    char action[32];
+    char recipient[32];
 } transaction_t;

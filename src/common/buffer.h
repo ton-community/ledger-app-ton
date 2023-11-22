@@ -4,6 +4,8 @@
 #include <stddef.h>   // size_t
 #include <stdbool.h>  // bool
 
+#include "types.h"
+
 /**
  * Enumeration for endianness.
  */
@@ -160,7 +162,7 @@ bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness)
 bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len);
 
 /**
- * Copy bytes from buffer without moving offset.
+ * Copy all remaining bytes from buffer without moving offset.
  *
  * @param[in]  buffer
  *   Pointer to input buffer struct.
@@ -175,7 +177,7 @@ bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len);
 bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len);
 
 /**
- * Move bytes from buffer.
+ * Move all remaining bytes from buffer.
  *
  * @param[in,out]  buffer
  *   Pointer to input buffer struct.
@@ -190,7 +192,7 @@ bool buffer_copy(const buffer_t *buffer, uint8_t *out, size_t out_len);
 bool buffer_move(buffer_t *buffer, uint8_t *out, size_t out_len);
 
 /**
- * Checks if reference to a buffer is correct
+ * Set out to point to the remaining contents of the buffer.
  *
  * @param[in]  buffer
  *   Pointer to input buffer struct.
@@ -205,7 +207,7 @@ bool buffer_move(buffer_t *buffer, uint8_t *out, size_t out_len);
 bool buffer_read_ref(buffer_t *buffer, uint8_t **out, size_t out_len);
 
 /**
- * Checks if reference to a buffer is correct
+ * Move some bytes from buffer.
  *
  * @param[in]  buffer
  *   Pointer to input buffer struct.
@@ -218,3 +220,57 @@ bool buffer_read_ref(buffer_t *buffer, uint8_t **out, size_t out_len);
  *
  */
 bool buffer_read_buffer(buffer_t *buffer, uint8_t *out, size_t out_len);
+
+/**
+ * Read variable length integer from buffer.
+ *
+ * @param[in]  buffer
+ *   Pointer to input buffer struct.
+ * @param[out] out_size
+ *   Pointer to variable length integer size.
+ * @param[out] out
+ *   Pointer to output byte buffer.
+ * @param[in]  out_len
+ *   Length of output byte buffer.
+ *
+ * @return true if success, false otherwise.
+ *
+ */
+bool buffer_read_varuint(buffer_t *buffer, uint8_t *out_size, uint8_t *out, size_t out_len);
+
+/**
+ * Tell how many bytes are left in buffer.
+ *
+ * @param[in]  buffer
+ *   Pointer to input buffer struct.
+ *
+ * @return amount of bytes left in buffer
+ *
+ */
+size_t buffer_remaining(const buffer_t *buffer);
+
+/**
+ * Read serialized address (33 bytes) from buffer.
+ *
+ * @param[in]  buffer
+ *   Pointer to input buffer struct.
+ * @param[out] out
+ *   Pointer to output address.
+ *
+ * @return true if success, false otherwise.
+ *
+ */
+bool buffer_read_address(buffer_t *buf, address_t *out);
+
+/**
+ * Read serialized cell reference (34 bytes) from buffer.
+ *
+ * @param[in]  buffer
+ *   Pointer to input buffer struct.
+ * @param[out] out
+ *   Pointer to output cell reference.
+ *
+ * @return true if success, false otherwise.
+ *
+ */
+bool buffer_read_cell_ref(buffer_t *buf, CellRef_t *out);

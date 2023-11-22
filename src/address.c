@@ -20,13 +20,19 @@
 #include <stdbool.h>  // bool
 #include <string.h>   // memmove
 
-#include "os.h"
 #include "cx.h"
 
 #include "address.h"
 
 #include "transaction/types.h"
 #include "common/crc16.h"
+#include "common/format_address.h"
+#include "constants.h"
+
+#define SAFE(RES)         \
+    if ((RES) != CX_OK) { \
+        return false;     \
+    }
 
 const uint8_t root_header[] = {
     // Cell data and refs descriptor
@@ -88,64 +94,48 @@ const uint8_t data_tail[] = {
     0x40  // zero bit + padding
 };
 
-bool address_to_friendly(const uint8_t chain,
-                         const uint8_t hash[static 32],
-                         const bool bounceable,
-                         const bool testOnly,
-                         uint8_t *out,
-                         size_t out_len) {
-    if (out_len < ADDRESS_LEN) {
+bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN], uint8_t *out, size_t out_len) {
+    if (out_len != HASH_LEN) {
         return false;
     }
 
-    // Address Tag
-    if (bounceable) {
-        out[0] = 0x11;  // Bounceable
-    } else {
-        out[0] = 0x51;  // Non-Bounceable
-    }
-    if (testOnly) {
-        out[0] = out[0] | 0x80;
-    }
+    uint8_t inner[HASH_LEN] = {0};
+    cx_sha256_t state;
 
-    // Workchain
-    out[1] = chain;
+    // Hash init data cell bits
+    SAFE(cx_sha256_init_no_throw(&state));
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, data_header, sizeof(data_header), NULL, 0));
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, public_key, PUBKEY_LEN, NULL, 0));
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state,
+                          CX_LAST,
+                          data_tail,
+                          sizeof(data_tail),
+                          inner,
+                          sizeof(inner)));
 
-    // Hash
-    memmove(out + 2, hash, 32);
-
-    // crc16
-    uint16_t crc = crc16(out, 34);
-    out[34] = (crc >> 8) & 0xff;
-    out[35] = crc & 0xff;
+    // Hash root
+    SAFE(cx_sha256_init_no_throw(&state));
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, root_header, sizeof(root_header), NULL, 0));
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state, CX_LAST, inner, sizeof(inner), out, out_len));
 
     return true;
 }
 
-bool address_from_pubkey(const uint8_t public_key[static 32],
+bool address_from_pubkey(const uint8_t public_key[static PUBKEY_LEN],
                          const uint8_t chain,
                          const bool bounceable,
                          const bool testOnly,
                          uint8_t *out,
                          size_t out_len) {
-    uint8_t hash[32] = {0};
-    uint8_t inner[32] = {0};
-    cx_sha256_t state;
-
     if (out_len < ADDRESS_LEN) {
         return false;
     }
 
-    // Hash init data cell bits
-    cx_sha256_init(&state);
-    cx_hash((cx_hash_t *) &state, 0, data_header, sizeof(data_header), NULL, 0);
-    cx_hash((cx_hash_t *) &state, 0, public_key, 32, NULL, 0);
-    cx_hash((cx_hash_t *) &state, CX_LAST, data_tail, sizeof(data_tail), inner, sizeof(inner));
+    uint8_t hash[HASH_LEN] = {0};
 
-    // Hash root
-    cx_sha256_init(&state);
-    cx_hash((cx_hash_t *) &state, 0, root_header, sizeof(root_header), NULL, 0);
-    cx_hash((cx_hash_t *) &state, CX_LAST, inner, sizeof(inner), hash, sizeof(hash));
+    if (!pubkey_to_hash(public_key, hash, sizeof(hash))) {
+        return false;
+    }
 
     // Convert to friendly
     address_to_friendly(chain, hash, bounceable, testOnly, out, out_len);

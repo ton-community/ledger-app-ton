@@ -32,14 +32,17 @@ void ui_action_validate_pubkey(bool choice) {
         io_send_sw(SW_DENY);
     }
 
+#ifdef HAVE_BAGL
+    // only for old devices
     ui_menu_main();
+#endif
 }
 
 void ui_action_validate_transaction(bool choice) {
     if (choice) {
         G_context.state = STATE_APPROVED;
 
-        if (crypto_sign_message() < 0) {
+        if (crypto_sign_tx() < 0) {
             G_context.state = STATE_NONE;
             io_send_sw(SW_SIGNATURE_FAIL);
         } else {
@@ -50,5 +53,42 @@ void ui_action_validate_transaction(bool choice) {
         io_send_sw(SW_DENY);
     }
 
+#ifdef HAVE_BAGL
+    // only for old devices
     ui_menu_main();
+#endif
+}
+
+void ui_action_validate_proof(bool choice) {
+    if (choice) {
+        if (crypto_sign_proof() < 0) {
+            io_send_sw(SW_SIGNATURE_FAIL);
+        } else {
+            helper_send_response_sig_proof();
+        }
+    } else {
+        io_send_sw(SW_DENY);
+    }
+
+#ifdef HAVE_BAGL
+    // only for old devices
+    ui_menu_main();
+#endif
+}
+
+void ui_action_validate_sign_data(bool choice) {
+    if (choice) {
+        if (crypto_sign_sign_data() < 0) {
+            io_send_sw(SW_SIGNATURE_FAIL);
+        } else {
+            helper_send_response_sig_sign_data();
+        }
+    } else {
+        io_send_sw(SW_DENY);
+    }
+
+#ifdef HAVE_BAGL
+    // only for old devices
+    ui_menu_main();
+#endif
 }
