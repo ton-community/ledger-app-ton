@@ -1,6 +1,5 @@
 pytest
-ragger[speculos,ledgerwallet]>=1.11.4
-pysha3>=1.0.0,<2.0.0
+ragger[speculos,ledgerwallet]>=1.18.1
 tonsdk==1.0.13
 ecdsa>=0.18.0
 

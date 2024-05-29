@@ -77,6 +77,12 @@ static void start_regular_review(void) {
     pairs[pairIndex].value = g_address;
     pairIndex++;
 
+    if (G_context.tx_info.transaction.has_payload && G_context.tx_info.transaction.is_blind) {
+        pairs[pairIndex].item = "Payload";
+        pairs[pairIndex].value = g_payload;
+        pairIndex++;
+    }
+
     print_hints(&G_context.tx_info.transaction.hints, &pairs[pairIndex]);
 
     pairList.pairs = pairs;
@@ -93,6 +99,21 @@ static void start_regular_review(void) {
     infoLongPress.longPressText = "Hold to sign";
 
     nbgl_useCaseStaticReview(&pairList, &infoLongPress, "Reject transaction", on_review_choice);
+}
+
+static void show_blind_warning_if_needed(void) {
+    if (G_context.tx_info.transaction.is_blind) {
+        nbgl_useCaseReviewStart(
+            &C_round_warning_64px,
+            "Blind Signing",
+            "This transaction cannot be\nsecurely interpreted by Ledger\nStax. It might put "
+            "your assets\nat risk.",
+            "Reject transaction",
+            start_regular_review,
+            ask_rejection_confirmation);
+    } else {
+        start_regular_review();
+    }
 }
 
 // Public function to start the transaction review
@@ -128,10 +149,27 @@ int ui_display_transaction() {
                             g_transaction_title,
                             NULL,
                             "Reject transaction",
-                            start_regular_review,
+                            show_blind_warning_if_needed,
                             ask_rejection_confirmation);
 
     return 0;
+}
+
+static void ui_blind_signing_error_choice(bool confirm) {
+    if (confirm) {
+        ui_menu_main();
+    } else {
+        ui_menu_settings();
+    }
+}
+
+void ui_blind_signing_error() {
+    nbgl_useCaseChoice(&C_warning64px,
+                       "This message cannot\nbe clear-signed",
+                       "Enable blind-signing in\nthe settings to sign\nthis transaction.",
+                       "Exit",
+                       "Go to settings",
+                       ui_blind_signing_error_choice);
 }
 
 #endif

@@ -84,3 +84,13 @@
  * Length of address in user-friendly form before base64 encoding (bytes).
  */
 #define ADDRESS_LEN 36
+
+/**
+ * Default subwallet id, which will not be displayed.
+ */
+#define DEFAULT_SUBWALLET_ID 698983191
+
+/**
+ * Max length for cell_inline types
+ */
+#define MAX_CELL_INLINE_LEN 32

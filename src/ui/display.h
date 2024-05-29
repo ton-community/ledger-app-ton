@@ -48,3 +48,8 @@ int ui_display_proof(uint8_t flags);
  *
  */
 int ui_display_sign_data(void);
+
+/**
+ * Display an error when blind signing was requested but is disabled.
+ */
+void ui_blind_signing_error(void);

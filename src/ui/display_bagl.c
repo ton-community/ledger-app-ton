@@ -173,6 +173,14 @@ UX_STEP_NOCB(ux_display_review_step,
                  "Review",
                  g_operation,
              });
+// Blind signing warning
+UX_STEP_NOCB(ux_display_blind_signing_warning_step,
+             pbb,
+             {
+                 &C_icon_warning,
+                 "Blind",
+                 "Signing",
+             });
 // Step with title/text for amount
 UX_STEP_NOCB(ux_display_amount_step,
              bnnn_paging,
@@ -226,14 +234,18 @@ int ui_display_transaction() {
     // Configure Flow
     int step = 0;
     ux_approval_flow[step++] = &ux_display_review_step;
+    if (G_context.tx_info.transaction.is_blind) {
+        ux_approval_flow[step++] = &ux_display_blind_signing_warning_step;
+    }
     ux_approval_flow[step++] = &ux_display_address_step;
     ux_approval_flow[step++] = &ux_display_amount_step;
-    if (G_context.tx_info.transaction.has_payload) {
-        g_hint_holder = &G_context.tx_info.transaction.hints;
-        g_hint_offset = -3;
-        for (uint16_t i = 0; i < G_context.tx_info.transaction.hints.hints_count; i++) {
-            ux_approval_flow[step++] = &ux_display_hint_step;
-        }
+    if (G_context.tx_info.transaction.has_payload && G_context.tx_info.transaction.is_blind) {
+        ux_approval_flow[step++] = &ux_display_payload_step;
+    }
+    g_hint_holder = &G_context.tx_info.transaction.hints;
+    g_hint_offset = -step;
+    for (uint16_t i = 0; i < G_context.tx_info.transaction.hints.hints_count; i++) {
+        ux_approval_flow[step++] = &ux_display_hint_step;
     }
     ux_approval_flow[step++] = &ux_display_approve_step;
     ux_approval_flow[step++] = &ux_display_reject_step;
@@ -278,6 +290,31 @@ int ui_display_sign_data() {
     ux_flow_init(0, ux_approval_flow, NULL);
 
     return 0;
+}
+
+#ifdef TARGET_NANOS
+UX_STEP_CB(ux_warning_contract_data_step,
+           bnnn_paging,
+           ui_menu_main(),
+           {
+               "Error",
+               "Blind signing must be enabled in Settings",
+           });
+#else
+UX_STEP_CB(ux_warning_contract_data_step,
+           pnn,
+           ui_menu_main(),
+           {
+               &C_icon_crossmark,
+               "Blind signing must be",
+               "enabled in Settings",
+           });
+#endif
+
+UX_FLOW(ux_warning_contract_data_flow, &ux_warning_contract_data_step);
+
+void ui_blind_signing_error() {
+    ux_flow_init(0, ux_warning_contract_data_flow, NULL);
 }
 
 #endif

@@ -94,10 +94,12 @@ bool hash_tx(transaction_ctx_t *ctx) {
 
     struct CellRef_t orderRef;
     BitString_init(&bits);
-    BitString_storeUint(&bits, 698983191, 32);                  // Wallet ID
-    BitString_storeUint(&bits, ctx->transaction.timeout, 32);   // Timeout
-    BitString_storeUint(&bits, ctx->transaction.seqno, 32);     // Seqno
-    BitString_storeUint(&bits, 0, 8);                           // Simple order
+    BitString_storeUint(&bits, ctx->transaction.subwallet_id, 32);  // Wallet ID
+    BitString_storeUint(&bits, ctx->transaction.timeout, 32);       // Timeout
+    BitString_storeUint(&bits, ctx->transaction.seqno, 32);         // Seqno
+    if (ctx->transaction.include_wallet_op) {
+        BitString_storeUint(&bits, 0, 8);  // Simple order
+    }
     BitString_storeUint(&bits, ctx->transaction.send_mode, 8);  // Send Mode
     struct CellRef_t orderRefs[1] = {internalMessageRef};
     if (!hash_Cell(&bits, orderRefs, 1, &orderRef)) {

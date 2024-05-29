@@ -132,6 +132,21 @@ bool buffer_read_u16(buffer_t *buffer, uint16_t *value, endianness_t endianness)
 bool buffer_read_u32(buffer_t *buffer, uint32_t *value, endianness_t endianness);
 
 /**
+ * Read 6 bytes from buffer into uint64_t.
+ *
+ * @param[in,out]  buffer
+ *   Pointer to input buffer struct.
+ * @param[out]     value
+ *   Pointer to 64-bit unsigned integer read from buffer.
+ * @param[in]      endianness
+ *   Either BE (Big Endian) or LE (Little Endian).
+ *
+ * @return true if success, false otherwise.
+ *
+ */
+bool buffer_read_u48(buffer_t *buffer, uint64_t *value, endianness_t endianness);
+
+/**
  * Read 8 bytes from buffer into uint64_t.
  *
  * @param[in,out]  buffer

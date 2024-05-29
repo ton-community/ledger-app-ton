@@ -30,7 +30,6 @@ def test_get_proof_accepted(firmware, backend, navigator, test_name):
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ]
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
                                            test_name,
@@ -62,18 +61,15 @@ def test_get_proof_refused(firmware, backend, navigator, test_name):
         instructions_set = [
             [
                 NavInsID.USE_CASE_REVIEW_REJECT,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ],
             [
                 NavInsID.USE_CASE_REVIEW_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ],
             [
                 NavInsID.USE_CASE_REVIEW_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ]
         ]
         for i, instructions in enumerate(instructions_set):

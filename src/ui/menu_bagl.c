@@ -37,6 +37,27 @@ static const char* no_yes_data_getter(unsigned int idx) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////
+// Allow blind signing submenu
+
+static void allow_blind_sign_data_change(bool value) {
+    nvm_write((void*) &N_storage.blind_signing_enabled, (void*) &value, sizeof(value));
+}
+
+static void allow_blind_sign_data_selector(unsigned int idx) {
+    switch (idx) {
+        case 0:
+            allow_blind_sign_data_change(false);
+            break;
+        case 1:
+            allow_blind_sign_data_change(true);
+            break;
+        default:
+            break;
+    }
+    ux_menulist_init_select(0, settings_submenu_getter, settings_submenu_selector, 0);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////
 // Expert mode submenu
 
 static void expert_mode_data_change(bool value) {
@@ -54,10 +75,11 @@ static void expert_mode_data_selector(unsigned int idx) {
         default:
             break;
     }
-    ux_menulist_init_select(0, settings_submenu_getter, settings_submenu_selector, 0);
+    ux_menulist_init_select(0, settings_submenu_getter, settings_submenu_selector, 1);
 }
 
 static const char* const settings_submenu_getter_values[] = {
+    "Allow blind sign",
     "Expert mode",
     "Back",
 };
@@ -72,6 +94,12 @@ static const char* settings_submenu_getter(unsigned int idx) {
 static void settings_submenu_selector(unsigned int idx) {
     switch (idx) {
         case 0:
+            ux_menulist_init_select(0,
+                                    no_yes_data_getter,
+                                    allow_blind_sign_data_selector,
+                                    N_storage.blind_signing_enabled);
+            break;
+        case 1:
             ux_menulist_init_select(0,
                                     no_yes_data_getter,
                                     expert_mode_data_selector,

@@ -13,7 +13,7 @@
 
 #define PLAINTEXT_REQUEST          0x754bf91b
 #define APP_DATA_REQUEST           0x54b58535
-#define MAX_PLAINTEXT_LENGTH       188
+#define MAX_PLAINTEXT_LENGTH       120
 #define MAX_APP_DATA_DOMAIN_LENGTH 126  // max allowed domain len as per TON DNS spec
 
 #define SAFE(RES)     \

@@ -42,6 +42,7 @@ void nv_init() {
     if (!N_storage.initialized) {
         internalStorage_t storage;
         storage.initialized = true;
+        storage.blind_signing_enabled = false;
         storage.expert_mode = false;
         nvm_write((void *) &N_storage, (void *) &storage, sizeof(internalStorage_t));
     }

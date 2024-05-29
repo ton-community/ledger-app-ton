@@ -68,3 +68,7 @@
  * Status word for bad bip32 path.
  */
 #define SW_BAD_BIP32_PATH 0xB0BD
+/**
+ * Status word for a blind signing request when blind signing is disabled.
+ */
+#define SW_BLIND_SIGNING_DISABLED 0xBD00

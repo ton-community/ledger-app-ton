@@ -32,6 +32,7 @@
 #include "../handler/get_public_key.h"
 #include "../handler/sign_tx.h"
 #include "../handler/sign_data.h"
+#include "../handler/get_app_settings.h"
 
 int apdu_dispatcher(const command_t *cmd) {
     if (cmd->cla != CLA) {
@@ -132,6 +133,12 @@ int apdu_dispatcher(const command_t *cmd) {
             buf.offset = 0;
 
             return handler_sign_data(&buf, (bool) (cmd->p2 & P2_FIRST), (bool) (cmd->p2 & P2_MORE));
+        case GET_APP_SETTINGS:
+            if (cmd->p1 != P1_NONE || cmd->p2 != P2_NONE) {
+                return io_send_sw(SW_WRONG_P1P2);
+            }
+
+            return handler_get_app_settings();
         default:
             return io_send_sw(SW_INS_NOT_SUPPORTED);
     }

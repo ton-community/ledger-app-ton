@@ -84,6 +84,11 @@ int handler_sign_tx(buffer_t *cdata, bool first, bool more) {
         return io_send_sw(SW_TX_PARSING_FAIL);
     }
 
+    if (G_context.tx_info.transaction.is_blind && !N_storage.blind_signing_enabled) {
+        ui_blind_signing_error();
+        return io_send_sw(SW_BLIND_SIGNING_DISABLED);
+    }
+
     // Hash
     if (!hash_tx(&G_context.tx_info)) {
         return io_send_sw(SW_TX_PARSING_FAIL);

@@ -31,7 +31,6 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
                 NavIns(NavInsID.TOUCH, (200, 335)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ]
             navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
                                            test_name,
@@ -60,12 +59,10 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
         instructions_set = [
             [
                 NavInsID.USE_CASE_REVIEW_REJECT,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ],
             [
                 NavInsID.USE_CASE_REVIEW_TAP,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
-                NavInsID.WAIT_FOR_HOME_SCREEN
             ]
         ]
         for i, instructions in enumerate(instructions_set):

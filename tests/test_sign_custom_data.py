@@ -21,7 +21,7 @@ def test_sign_data(firmware, backend, navigator, test_name):
     pubkey = client.get_public_key(path=path).data
 
     requests: List[SignDataRequest] = [
-        PlaintextSignDataRequest("a" * 188),
+        PlaintextSignDataRequest("a" * 120),
         AppDataSignDataRequest(Cell(), address=Address("0:" + "0" * 64), domain="test.ton", ext=Cell())
     ]
 

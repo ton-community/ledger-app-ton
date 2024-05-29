@@ -36,8 +36,18 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
 
     // tag
     SAFE(buffer_read_u8(buf, &tx->tag), TAG_PARSING_ERROR);
-    if (tx->tag != 0x00) {  // Only 0x00 is supported now
+    if (tx->tag >= 0x02) {  // Only 0x00 and 0x01 are supported now
         return TAG_PARSING_ERROR;
+    }
+
+    tx->hints.hints_count = 0;
+
+    if (tx->tag == 0x01) {
+        SAFE(buffer_read_u32(buf, &tx->subwallet_id, BE), GENERAL_ERROR);
+        SAFE(buffer_read_bool(buf, &tx->include_wallet_op), GENERAL_ERROR);
+    } else {
+        tx->subwallet_id = DEFAULT_SUBWALLET_ID;
+        tx->include_wallet_op = true;
     }
 
     // Basic Transaction parameters
@@ -74,6 +84,10 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
 
     // Process hints
     SAFE(process_hints(tx), HINTS_PARSING_ERROR);
+
+    if (tx->subwallet_id != DEFAULT_SUBWALLET_ID) {
+        add_hint_number(&tx->hints, "Subwallet ID", (uint64_t) tx->subwallet_id);
+    }
 
     return (buf->offset == buf->size) ? PARSING_OK : WRONG_LENGTH_ERROR;
 }

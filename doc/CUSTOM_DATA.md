@@ -30,7 +30,7 @@ text#_ {n:#} data:(SnakeData ~n) = Text;
 Ledger request format:
 | Value | Length or type | Description |
 | --- | --- | --- |
-| `message` | 0-250 | ASCII-only message |
+| `message` | 0-120 | ASCII-only message |
 
 ## App data (0x54b58535)
 

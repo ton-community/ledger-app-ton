@@ -10,6 +10,7 @@
 | `SIGN_TX` | 0x06 | Sign transaction given BIP32 path and raw transaction |
 | `GET_ADDRESS_PROOF` | 0x08 | Sign an address proof in TON Connect 2 compliant format given BIP32 path and proof parameters |
 | `SIGN_DATA` | 0x09 | Sign custom data in TON Connect 2 compliant format |
+| `GET_APP_SETTINGS` | 0x0A | Get app settings |
 
 ## GET_VERSION
 
@@ -129,6 +130,26 @@ Then an arbitrary number of chunks with serialized custom data (see [CUSTOM_DATA
 | --- | --- | --- |
 | 98 | 0x9000 | `len(signature) (1)` \|\| <br> `signature (64)` \|\| <br> `len(hash) (1)` \|\| <br> `hash (32)` \|\||
 
+## GET_APP_SETTINGS
+
+### Command
+
+| CLA | INS | P1 | P2 | Lc | CData |
+| --- | --- | --- | --- | --- | --- |
+| 0xE0 | 0x0A | 0x00 | 0x00 | 0x00 | - |
+
+### Response
+
+True/false settings are sent as bitfields, currently all settings fit in one byte, future versions may add additional flags to that byte or add new bytes.
+
+In the current version, `flags` has:
+- bit `0x01` set if blind signing is enabled
+- bit `0x02` set if expert mode is enabled
+
+| Response length (bytes) | SW | RData |
+| --- | --- | --- |
+| 1 | 0x9000 | `flags (1)` |
+
 ## Status Words
 
 | SW | SW name | Description |
@@ -149,4 +170,5 @@ Then an arbitrary number of chunks with serialized custom data (see [CUSTOM_DATA
 | 0xB008 | `SW_SIGNATURE_FAIL` | Signature of raw transaction failed |
 | 0xB00B | `SW_REQUEST_TOO_LONG` | The request is too long |
 | 0xB0BD | `SW_BAD_BIP32_PATH` | The bip32 derivation path is invalid |
+| 0xBD00 | `SW_BLIND_SIGNING_DISABLED` | A blind transaction was requested, but blind signing is disabled |
 | 0x9000 | `OK` | Success |

@@ -23,10 +23,13 @@ typedef enum {
     PAYLOAD_PARSING_ERROR = -9,
     STATE_INIT_PARSING_ERROR = -10,
     HINTS_PARSING_ERROR = -11,
+    GENERAL_ERROR = -12,
 } parser_status_e;
 
 typedef struct {
-    uint8_t tag;                             // tag (1 byte)
+    uint8_t tag;  // tag (1 byte)
+    uint32_t subwallet_id;
+    bool include_wallet_op;
     uint32_t seqno;                          // seqno (4 bytes)
     uint32_t timeout;                        // timeout (4 bytes)
     uint8_t value_buf[MAX_VALUE_BYTES_LEN];  // big endian transaction value
@@ -42,6 +45,7 @@ typedef struct {
     uint32_t hints_type;                     // hints type if exists
     uint16_t hints_len;                      // hints len if exists
     uint8_t* hints_data;                     // hints data if exists
+    bool is_blind;                           // does transaction require blind signing
     HintHolder_t hints;
     char title[32];
     char action[32];

@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "hints.h"
 
@@ -9,8 +10,9 @@
 #include "base64.h"
 #include "format_bigint.h"
 #include "format_address.h"
+#include "format.h"
 
-void add_hint_text(HintHolder_t* hints, const char* title, char* text, size_t text_len) {
+void add_hint_text(HintHolder_t* hints, const char* title, const char* text, size_t text_len) {
     // Configure
     hints->hints[hints->hints_count].title = title;
     hints->hints[hints->hints_count].kind = SummaryItemString;
@@ -26,6 +28,19 @@ void add_hint_hash(HintHolder_t* hints, const char* title, uint8_t* data) {
     hints->hints[hints->hints_count].title = title;
     hints->hints[hints->hints_count].kind = SummaryHash;
     memmove(hints->hints[hints->hints_count].hash, data, HASH_LEN);
+
+    // Next
+    hints->hints_count++;
+}
+
+void add_hint_hex(HintHolder_t* hints, const char* title, uint8_t* data, uint8_t data_len) {
+    // Configure
+    hints->hints[hints->hints_count].title = title;
+    hints->hints[hints->hints_count].kind = SummaryHex;
+    memmove(hints->hints[hints->hints_count].hex.data,
+            data,
+            data_len > HASH_LEN ? HASH_LEN : data_len);
+    hints->hints[hints->hints_count].hex.len = data_len;
 
     // Next
     hints->hints_count++;
@@ -57,6 +72,24 @@ void add_hint_address(HintHolder_t* hints, const char* title, address_t address,
     hints->hints[hints->hints_count].kind = SummaryAddress;
     hints->hints[hints->hints_count].address.address = address;
     hints->hints[hints->hints_count].address.bounceable = bounceable;
+
+    // Next
+    hints->hints_count++;
+}
+
+void add_hint_number(HintHolder_t* hints, const char* title, uint64_t number) {
+    hints->hints[hints->hints_count].title = title;
+    hints->hints[hints->hints_count].kind = SummaryNumber;
+    hints->hints[hints->hints_count].number = number;
+
+    // Next
+    hints->hints_count++;
+}
+
+void add_hint_bool(HintHolder_t* hints, const char* title, bool value) {
+    hints->hints[hints->hints_count].title = title;
+    hints->hints[hints->hints_count].kind = SummaryBool;
+    hints->hints[hints->hints_count].bool_value = value;
 
     // Next
     hints->hints_count++;
@@ -125,6 +158,16 @@ void print_hint(HintHolder_t* hints,
                             sizeof(address));
         memset(body, 0, body_len);
         base64_encode(address, sizeof(address), body, body_len);
+    } else if (hint.kind == SummaryNumber) {
+        format_u64(hint.number, body, body_len);
+    } else if (hint.kind == SummaryBool) {
+        snprintf(body, body_len, hint.bool_value ? "Yes" : "No");
+    } else if (hint.kind == SummaryHex) {
+        if (body_len >= 3 + 2 * hint.hex.len) {
+            body[0] = '0';
+            body[1] = 'x';
+            format_hex(hint.hex.data, hint.hex.len, &body[2], body_len - 2);
+        }
     } else {
         print_string("<unknown>", body, body_len);
     }

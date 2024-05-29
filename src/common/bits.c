@@ -58,7 +58,7 @@ void BitString_storeCoinsBuf(BitString_t* self, uint8_t* v, uint8_t len) {
     BitString_storeBuffer(self, v, len);
 }
 
-void BitString_storeBuffer(BitString_t* self, uint8_t* v, uint8_t length) {
+void BitString_storeBuffer(BitString_t* self, const uint8_t* v, uint8_t length) {
     for (int i = 0; i < length; i++) {
         BitString_storeUint(self, v[i], 8);
     }

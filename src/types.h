@@ -27,6 +27,7 @@ typedef enum {
     SIGN_TX = 0x06,            /// sign transaction with BIP32 path
     GET_ADDRESS_PROOF = 0x08,  /// get an address proof in TON Connect format
     SIGN_DATA = 0x09,          /// sign data in TON Connect format
+    GET_APP_SETTINGS = 0x0a,   /// get app settings
 } command_e;
 
 /**
@@ -120,4 +121,5 @@ typedef struct {
 typedef struct {
     bool initialized;
     bool expert_mode;
+    bool blind_signing_enabled;
 } internalStorage_t;

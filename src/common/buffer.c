@@ -134,6 +134,21 @@ bool buffer_read_u64(buffer_t *buffer, uint64_t *value, endianness_t endianness)
     return true;
 }
 
+bool buffer_read_u48(buffer_t *buffer, uint64_t *value, endianness_t endianness) {
+    if (!buffer_can_read(buffer, 6)) {
+        *value = 0;
+
+        return false;
+    }
+
+    *value = ((endianness == BE) ? read_u48_be(buffer->ptr, buffer->offset)
+                                 : read_u48_le(buffer->ptr, buffer->offset));
+
+    buffer_seek_cur(buffer, 6);
+
+    return true;
+}
+
 bool buffer_read_bip32_path(buffer_t *buffer, uint32_t *out, size_t out_len) {
     if (!bip32_path_read(buffer->ptr + buffer->offset, buffer_remaining(buffer), out, out_len)) {
         return false;

@@ -39,7 +39,8 @@ static const char *const INFO_TYPES[] = {"Version", "Developer"};
 static const char *const INFO_CONTENTS[] = {APPVERSION, "TonTech"};
 
 enum {
-    EXPERT_MODE_TOKEN = FIRST_USER_TOKEN,
+    BLIND_SIGNING_TOKEN = FIRST_USER_TOKEN,
+    EXPERT_MODE_TOKEN,
 };
 
 static nbgl_layoutSwitch_t switches[2];
@@ -55,6 +56,12 @@ static bool nav_callback(uint8_t page, nbgl_pageContent_t *content) {
         }
         case 1: {
             int sw = 0;
+            switches[sw++] = (nbgl_layoutSwitch_t){
+                .initState = N_storage.blind_signing_enabled ? ON_STATE : OFF_STATE,
+                .text = "Blind signing",
+                .subText = "Enable transaction blind\nsigning",
+                .token = BLIND_SIGNING_TOKEN,
+                .tuneId = TUNE_TAP_CASUAL};
             switches[sw++] = (nbgl_layoutSwitch_t){
                 .initState = N_storage.expert_mode ? ON_STATE : OFF_STATE,
                 .text = "Expert mode",
@@ -78,6 +85,10 @@ static void controls_callback(int token, uint8_t index) {
     (void) index;
     bool value;
     switch (token) {
+        case BLIND_SIGNING_TOKEN:
+            value = N_storage.blind_signing_enabled ? false : true;
+            nvm_write((void *) &N_storage.blind_signing_enabled, (void *) &value, sizeof(bool));
+            break;
         case EXPERT_MODE_TOKEN:
             value = N_storage.expert_mode ? false : true;
             nvm_write((void *) &N_storage.expert_mode, (void *) &value, sizeof(bool));

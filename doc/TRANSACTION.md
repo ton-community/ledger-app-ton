@@ -18,13 +18,19 @@ Address is serialized by appending a single byte of chain - 0x00 or 0xff and the
 
 ## Cells
 
-`Cell` is a fundamental data type used in TON, and everything is stored using it. A Cell can store up to 1023 bits, and up to 4 references to other cells (which themselves can store 4 more references each and so on). When hashing a Cell for signing, in order to reference another cell, only two of its properties need to be known - its depth and its hash. We define a format to serialize cell references in requests: 2 bytes for the max depth, and 32 bytes for the hash, 34 in total. We shall name this format `cell_ref`.
+`Cell` is a fundamental data type used in TON, and everything is stored using it. A Cell can store up to 1023 bits, and up to 4 references to other cells (which themselves can store 4 more references each and so on).
+
+When hashing a Cell for signing, in order to reference another cell, only two of its properties need to be known - its depth and its hash. We define a format to serialize cell references in requests: 2 bytes for the max depth, and 32 bytes for the hash, 34 in total. We shall name this format `cell_ref`.
+
+We shall also have another format for cells - 1 byte for length in bytes (n) and this many bytes as its contents, so n+1 bytes total. Such format may be used to display the stored data in hex, which is useful in a few situations. The cell will be hashed on the device. A non-integer amount of bytes cannot be stored that way. This type shall be named `cell_inline`. Cells of this type will be displayed as their data in hex. Currently, `cell_inline` has a limitation of max 32 bytes as data.
 
 ## Transaction request structure
 
 | Field | Size (bytes) or type | Description |
 | --- | :---: | --- |
-| `tag` | 1 | 0x00. Reserved for future. |
+| `tag` | 1 | 0x00 for app versions <2.1.0, 0x00 or 0x01 for app versions >=2.1.0. Higher values enable more features |
+| `subwallet_id` | 0 or 4 | Subwallet id. Only present when `tag == 0x01` |
+| `include_wallet_op` | 0 or 1 | Whether to include the 8-bit wallet op (0x01 to include, 0x00 to not include). Only present when `tag == 0x01` |
 | `seqno` | 4 | A sequence number used to prevent message replay |
 | `timeout` | 4 | Message timeout |
 | `value` | `varuint` | The amount in nanotons to send to the destination address encoded as described above |
@@ -46,7 +52,7 @@ Note that `payload` may be passed without `hints`, but `hints` cannot be passed 
 | `has_payload` | `has_hints` | Transaction type |
 | --- | --- | --- |
 | &cross; | &cross; | A simple transfer without any payload |
-| &check; | &cross; | An invalid request, an error will be thrown |
+| &check; | &cross; | Blind transaction signing, Ledger will display a warning and the payload hash but none of the message fields other than recipient and amount of TON transferred |
 | &check; | &check; | A transaction of some known types, see [MESSAGES.md](./MESSAGES.md) to learn about known types. Ledger will display all important fields |
 | &cross; | &check; | An invalid request, an error will be thrown |
 

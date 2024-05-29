@@ -1,4 +1,6 @@
 from ragger.conftest import configuration
+from ragger.navigator import NavInsID
+import pytest
 
 ###########################
 ### CONFIGURATION START ###
