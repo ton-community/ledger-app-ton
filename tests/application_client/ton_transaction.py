@@ -114,7 +114,7 @@ class JettonTransferPayload(Payload):
         flags = 0
         if self.query_id != 0:
             flags |= 1
-        if self.jetton_id != None:
+        if self.jetton_id is not None:
             flags |= 2
 
         main_body = b"".join([
@@ -123,7 +123,7 @@ class JettonTransferPayload(Payload):
             (b"".join([
                 self.jetton_id.to_bytes(2, byteorder="big"),
                 bytes([self.owner_workchain]),
-            ])) if self.jetton_id != None else bytes([]),
+            ])) if self.jetton_id is not None else bytes([]),
             write_varuint(self.amount),
             write_address(self.destination),
             write_address(self.response_destionation),
