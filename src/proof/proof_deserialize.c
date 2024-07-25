@@ -44,7 +44,19 @@ bool deserialize_proof(buffer_t *cdata, uint8_t flags) {
         return false;
     }
 
+    if (flags & P2_ADDR_FLAG_WALLET_SPECIFIERS) {
+        if (!buffer_read_bool(cdata, &G_context.proof_info.is_v3r2) ||
+            !buffer_read_u32(cdata, &G_context.proof_info.subwallet_id, BE)) {
+            return io_send_sw(SW_WRONG_DATA_LENGTH);
+        }
+    } else {
+        G_context.proof_info.subwallet_id = 698983191;
+        G_context.proof_info.is_v3r2 = false;
+    }
+
     if (!pubkey_to_hash(G_context.proof_info.raw_public_key,
+                        G_context.proof_info.subwallet_id,
+                        G_context.proof_info.is_v3r2,
                         G_context.proof_info.address_hash,
                         sizeof(G_context.proof_info.address_hash))) {
         io_send_sw(SW_DISPLAY_ADDRESS_FAIL);

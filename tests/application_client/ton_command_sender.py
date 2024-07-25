@@ -108,13 +108,25 @@ class BoilerplateCommandSender:
     @contextmanager
     def get_public_key_with_confirmation(self,
                                          path: str,
-                                         display_flags: AddressDisplayFlags
+                                         display_flags: AddressDisplayFlags,
+                                         is_v3r2: bool = False,
+                                         subwallet_id: int = 698983191,
                                         ) -> Generator[None, None, None]:
+        specifiers = bytes([])
+        if is_v3r2 or subwallet_id != 698983191:
+            display_flags |= 4
+            specifiers = b"".join([
+                bytes([1 if is_v3r2 else 0]),
+                subwallet_id.to_bytes(4, byteorder="big"),
+            ])
         with self.backend.exchange_async(cla=CLA,
                                          ins=InsType.GET_PUBLIC_KEY,
                                          p1=P1.P1_CONFIRM,
                                          p2=display_flags,
-                                         data=pack_derivation_path(path)) as response:
+                                         data=b"".join([
+                                             pack_derivation_path(path),
+                                             specifiers,
+                                         ])) as response:
             yield response
 
     @contextmanager
@@ -123,10 +135,20 @@ class BoilerplateCommandSender:
                           display_flags: AddressDisplayFlags,
                           domain: str,
                           timestamp: int,
-                          payload: bytes) -> Generator[None, None, None]:
+                          payload: bytes,
+                          is_v3r2: bool = False,
+                          subwallet_id: int = 698983191) -> Generator[None, None, None]:
         domain_b = bytes(domain, "utf8")
+        specifiers = bytes([])
+        if is_v3r2 or subwallet_id != 698983191:
+            display_flags |= 4
+            specifiers = b"".join([
+                bytes([1 if is_v3r2 else 0]),
+                subwallet_id.to_bytes(4, byteorder="big"),
+            ])
         req_bytes = b"".join([
             pack_derivation_path(path),
+            specifiers,
             bytes([len(domain_b)]),
             domain_b,
             timestamp.to_bytes(8, byteorder="big"),

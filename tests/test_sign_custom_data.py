@@ -38,12 +38,18 @@ def test_sign_data(firmware, backend, navigator, test_name):
                                                             ROOT_SCREENSHOT_PATH,
                                                             test_name + f"/part{i}")
             else:
-                navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_REVIEW_TAP,
+                navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                               test_name + f"/part{i}",
+                                               [
+                                                   NavInsID.SWIPE_CENTER_TO_RIGHT,
+                                               ])
+                navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                             NavInsID.USE_CASE_STATUS_DISMISS],
                                                             "Hold to sign",
                                                             ROOT_SCREENSHOT_PATH,
-                                                            test_name + f"/part{i}")
+                                                            test_name + f"/part{i}",
+                                                            screen_change_before_first_instruction=False)
 
         # The device as yielded the result, parse it and ensure that the signature is correct
         response = client.get_async_response().data
@@ -74,7 +80,10 @@ def test_sign_data_refused(firmware, backend, navigator, test_name):
         assert len(e.value.data) == 0
     else:
         for i in range(3):
-            instructions = [NavInsID.USE_CASE_REVIEW_TAP] * i
+            instructions = []
+            if i > 0:
+                instructions += [NavInsID.SWIPE_CENTER_TO_RIGHT]
+                instructions += [NavInsID.USE_CASE_VIEW_DETAILS_NEXT] * (i-1)
             instructions += [NavInsID.USE_CASE_REVIEW_REJECT,
                              NavInsID.USE_CASE_STATUS_DISMISS]
             with pytest.raises(ExceptionRAPDU) as e:

@@ -104,7 +104,7 @@ static void start_regular_review(void) {
 static void show_blind_warning_if_needed(void) {
     if (G_context.tx_info.transaction.is_blind) {
         nbgl_useCaseReviewStart(
-            &C_round_warning_64px,
+            &C_Important_Circle_64px,
             "Blind Signing",
             "This transaction cannot be\nsecurely interpreted by Ledger\nStax. It might put "
             "your assets\nat risk.",
@@ -164,7 +164,7 @@ static void ui_blind_signing_error_choice(bool confirm) {
 }
 
 void ui_blind_signing_error() {
-    nbgl_useCaseChoice(&C_warning64px,
+    nbgl_useCaseChoice(&C_Warning_64px,
                        "This message cannot\nbe clear-signed",
                        "Enable blind-signing in\nthe settings to sign\nthis transaction.",
                        "Exit",

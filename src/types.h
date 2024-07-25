@@ -66,6 +66,8 @@ typedef enum {
  */
 typedef struct {
     uint8_t raw_public_key[PUBKEY_LEN];
+    bool is_v3r2;
+    uint32_t subwallet_id;
 } pubkey_ctx_t;
 
 /**
@@ -85,6 +87,8 @@ typedef struct {
 typedef struct {
     uint8_t raw_public_key[PUBKEY_LEN];
     int32_t workchain;
+    uint32_t subwallet_id;
+    bool is_v3r2;
     uint8_t domain[MAX_DOMAIN_LEN];
     uint8_t domain_len;
     uint8_t hash[HASH_LEN];

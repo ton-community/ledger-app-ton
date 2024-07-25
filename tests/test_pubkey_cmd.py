@@ -27,8 +27,32 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
                                                       test_name)
         else:
             instructions = [
-                NavInsID.USE_CASE_REVIEW_TAP,
-                NavIns(NavInsID.TOUCH, (200, 335)),
+                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavIns(NavInsID.TOUCH, (65, 520)),
+                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
+                NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
+            ]
+            navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
+                                           test_name,
+                                           instructions)
+    response = client.get_async_response().data
+    assert len(response) == 32
+
+
+def test_get_public_key_confirm_accepted_v3r2(firmware, backend, navigator, test_name):
+    client = BoilerplateCommandSender(backend)
+    path = "m/44'/607'/0'/0'/0'/0'"
+    with client.get_public_key_with_confirmation(path, AddressDisplayFlags.NONE, is_v3r2=True):
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                      [NavInsID.BOTH_CLICK],
+                                                      "Approve",
+                                                      ROOT_SCREENSHOT_PATH,
+                                                      test_name)
+        else:
+            instructions = [
+                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavIns(NavInsID.TOUCH, (65, 520)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
             ]
@@ -61,7 +85,7 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
                 NavInsID.USE_CASE_REVIEW_REJECT,
             ],
             [
-                NavInsID.USE_CASE_REVIEW_TAP,
+                NavInsID.SWIPE_CENTER_TO_RIGHT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
             ]
         ]
