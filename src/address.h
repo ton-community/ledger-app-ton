@@ -24,7 +24,11 @@
  * @return true if success, false otherwise.
  *
  */
-bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN], const uint32_t subwallet_id, const bool is_v3r2, uint8_t *out, size_t out_len);
+bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN],
+                    const uint32_t subwallet_id,
+                    const bool is_v3r2,
+                    uint8_t *out,
+                    size_t out_len);
 
 /**
  * Convert public key to address. Uses Wallet V4 contract.
