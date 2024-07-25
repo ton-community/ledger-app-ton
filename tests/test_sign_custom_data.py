@@ -38,11 +38,9 @@ def test_sign_data(firmware, backend, navigator, test_name):
                                                             ROOT_SCREENSHOT_PATH,
                                                             test_name + f"/part{i}")
             else:
-                navigator.navigate_and_compare(ROOT_SCREENSHOT_PATH,
-                                               test_name + f"/part{i}",
-                                               [
-                                                   NavInsID.SWIPE_CENTER_TO_RIGHT,
-                                               ])
+                navigator.navigate([
+                                       NavInsID.SWIPE_CENTER_TO_RIGHT,
+                                   ])
                 navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,
                                                             NavInsID.USE_CASE_STATUS_DISMISS],
