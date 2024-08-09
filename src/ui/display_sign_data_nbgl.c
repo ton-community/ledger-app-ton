@@ -11,7 +11,7 @@
 #include "display.h"
 #include "../constants.h"
 #include "../globals.h"
-#include "../io.h"
+#include "io.h"
 #include "../sw.h"
 #include "action/validate.h"
 #include "menu.h"

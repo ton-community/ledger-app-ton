@@ -28,7 +28,7 @@
 #include "../globals.h"
 #include "../crypto.h"
 #include "../ui/display.h"
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../common/bip32_check.h"
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"

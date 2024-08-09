@@ -21,129 +21,53 @@ endif
 
 include $(BOLOS_SDK)/Makefile.defines
 
-APP_LOAD_PARAMS  = --curve ed25519
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
-APP_LOAD_PARAMS += --appFlags 0x200  # APPLICATION_FLAG_BOLOS_SETTINGS
-else
-APP_LOAD_PARAMS += --appFlags 0x000
-endif
-APP_LOAD_PARAMS += --path "44'/607'"
-APP_LOAD_PARAMS += $(COMMON_LOAD_PARAMS)
-
-APPNAME      = "TON"
-APPVERSION_M = 2
-APPVERSION_N = 2
-APPVERSION_P = 0
-APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
-
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-    ICONNAME=icons/nanos_app_ton.gif
-else ifeq ($(TARGET_NAME),TARGET_STAX)
-    ICONNAME=icons/ledger_stax_ton_32.gif
-else
-    ICONNAME=icons/nanox_app_ton.gif
-endif
-
-all: default
-
-DEFINES += $(DEFINES_LIB)
-DEFINES += APPNAME=\"$(APPNAME)\"
-DEFINES += APPVERSION=\"$(APPVERSION)\"
-DEFINES += MAJOR_VERSION=$(APPVERSION_M) MINOR_VERSION=$(APPVERSION_N) PATCH_VERSION=$(APPVERSION_P)
-DEFINES += OS_IO_SEPROXYHAL
-DEFINES += HAVE_SPRINTF HAVE_SNPRINTF_FORMAT_U
-DEFINES += HAVE_IO_USB HAVE_L4_USBLIB IO_USB_MAX_ENDPOINTS=6 IO_HID_EP_LENGTH=64 HAVE_USB_APDU
-DEFINES += USB_SEGMENT_SIZE=64
-DEFINES += BLE_SEGMENT_SIZE=32
-DEFINES += HAVE_WEBUSB WEBUSB_URL_SIZE_B=0 WEBUSB_URL=""
-
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
-    DEFINES += HAVE_BLE BLE_COMMAND_TIMEOUT_MS=2000 HAVE_BLE_APDU
-endif
-
-ifeq ($(TARGET_NAME),TARGET_NANOS)
-    DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=128
-else
-    DEFINES += IO_SEPROXYHAL_BUFFER_SIZE_B=300
-endif
-
-ifeq ($(TARGET_NAME),TARGET_STAX)
-    DEFINES += NBGL_QRCODE
-    SDK_SOURCE_PATH += qrcode
-else
-    DEFINES += HAVE_BAGL HAVE_UX_FLOW
-    ifneq ($(TARGET_NAME),TARGET_NANOS)
-        DEFINES += HAVE_GLO096
-        DEFINES += BAGL_WIDTH=128 BAGL_HEIGHT=64
-        DEFINES += HAVE_BAGL_ELLIPSIS # long label truncation feature
-        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_REGULAR_11PX
-        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_EXTRABOLD_11PX
-        DEFINES += HAVE_BAGL_FONT_OPEN_SANS_LIGHT_16PX
-    endif
-endif
-
 ifneq ($(TARGET_NAME),TARGET_NANOS)
     DEFINES += HAVE_HARDCODED_JETTONS
 endif
 
-DEBUG = 0
-ifneq ($(DEBUG),0)
-    DEFINES += HAVE_PRINTF
-    ifeq ($(TARGET_NAME),TARGET_NANOS)
-        DEFINES += PRINTF=screen_printf
-    else
-        DEFINES += PRINTF=mcu_usb_printf
-    endif
-else
-        DEFINES += PRINTF\(...\)=
-endif
-
-ifneq ($(BOLOS_ENV),)
-$(info BOLOS_ENV=$(BOLOS_ENV))
-CLANGPATH := $(BOLOS_ENV)/clang-arm-fropi/bin/
-GCCPATH   := $(BOLOS_ENV)/gcc-arm-none-eabi-5_3-2016q1/bin/
-else
-$(info BOLOS_ENV is not set: falling back to CLANGPATH and GCCPATH)
-endif
-ifeq ($(CLANGPATH),)
-$(info CLANGPATH is not set: clang will be used from PATH)
-endif
-ifeq ($(GCCPATH),)
-$(info GCCPATH is not set: arm-none-eabi-* will be used from PATH)
-endif
-
-CC      := $(CLANGPATH)clang
-CFLAGS  += -O3 -Os
-AS      := $(GCCPATH)arm-none-eabi-gcc
-LD      := $(GCCPATH)arm-none-eabi-gcc
-LDFLAGS += -O3 -Os
-LDLIBS  += -lm -lgcc -lc
-
-include $(BOLOS_SDK)/Makefile.glyphs
+APPNAME      = "TON"
+APPVERSION_M = 2
+APPVERSION_N = 3
+APPVERSION_P = 0
+APPVERSION   = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 APP_SOURCE_PATH += src
-SDK_SOURCE_PATH += lib_stusb lib_stusb_impl
 
-ifneq ($(TARGET_NAME),TARGET_STAX)
-    SDK_SOURCE_PATH += lib_ux
-endif
+ICON_NANOX = icons/nanox_app_ton.gif
+ICON_NANOSP = icons/nanox_app_ton.gif
+ICON_NANOS = icons/nanos_app_ton.gif
+ICON_STAX = icons/ledger_stax_ton_32.gif
+ICON_FLEX = icons/ledger_flex_ton_40.gif
 
-ifeq ($(TARGET_NAME),$(filter $(TARGET_NAME),TARGET_NANOX TARGET_STAX))
-    SDK_SOURCE_PATH += lib_blewbxx lib_blewbxx_impl
-endif
+CURVE_APP_LOAD_PARAMS = ed25519
 
-load: all
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS)
+PATH_APP_LOAD_PARAMS = "44'/607'"
 
-load-offline: all
-	python3 -m ledgerblue.loadApp $(APP_LOAD_PARAMS) --offline
+VARIANT_PARAM = COIN
+VARIANT_VALUES = TON
 
-delete:
-	python3 -m ledgerblue.deleteApp $(COMMON_DELETE_PARAMS)
+# DEBUG = 1
 
-include $(BOLOS_SDK)/Makefile.rules
+# HAVE_APPLICATION_FLAG_DERIVE_MASTER = 1
+# HAVE_APPLICATION_FLAG_GLOBAL_PIN = 1
+# HAVE_APPLICATION_FLAG_BOLOS_SETTINGS = 1
+# HAVE_APPLICATION_FLAG_LIBRARY = 1
 
-dep/%.d: %.c Makefile
+ENABLE_BLUETOOTH = 1
+# ENABLE_NFC = 1
 
-listvariants:
-	@echo VARIANTS COIN TON
+ENABLE_NBGL_QRCODE = 1
+# ENABLE_NBGL_KEYBOARD = 1
+# ENABLE_NBGL_KEYPAD = 1
+
+# DISABLE_STANDARD_APP_FILES = 1 
+# DISABLE_DEFAULT_IO_SEPROXY_BUFFER_SIZE = 1 # To allow custom size declaration
+# DISABLE_STANDARD_APP_DEFINES = 1 # Will set all the following disablers
+# DISABLE_STANDARD_SNPRINTF = 1
+# DISABLE_STANDARD_USB = 1
+# DISABLE_STANDARD_WEBUSB = 1
+# DISABLE_STANDARD_BAGL_UX_FLOW = 1
+# DISABLE_DEBUG_LEDGER_ASSERT = 1
+# DISABLE_DEBUG_THROW = 1
+
+include $(BOLOS_SDK)/Makefile.standard_app

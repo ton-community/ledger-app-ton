@@ -6,11 +6,11 @@
 
 #include "proof_deserialize.h"
 
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../common/bip32_check.h"
 #include "../types.h"
 #include "../globals.h"
-#include "../io.h"
+#include "io.h"
 #include "../sw.h"
 #include "../crypto.h"
 #include "../address.h"

@@ -19,9 +19,9 @@
 
 #include "get_app_settings.h"
 #include "../globals.h"
-#include "../io.h"
+#include "io.h"
 #include "../sw.h"
-#include "common/buffer.h"
+#include "common/mybuffer.h"
 
 int handler_get_app_settings() {
     uint8_t flags = 0x00;
@@ -36,5 +36,5 @@ int handler_get_app_settings() {
 
     buffer_t rdata = {.ptr = (uint8_t *) &flags, .size = sizeof(flags), .offset = 0};
 
-    return io_send_response(&rdata, SW_OK);
+    return io_send_response_buffer(&rdata, SW_OK);
 }

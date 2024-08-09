@@ -2,7 +2,7 @@
 
 #include <stdbool.h>  // bool
 
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 
 /**
  * Handler for SIGN_DATA command. If successfully parse BIP32 path

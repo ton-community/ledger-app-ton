@@ -6,7 +6,7 @@
 
 #include <cmocka.h>
 
-#include "common/bip32.h"
+#include "bip32.h"
 
 static void test_bip32_format(void **state) {
     (void) state;

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 
 #include "types.h"
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../common/types.h"
 
 bool buffer_read_address(buffer_t *buf, address_t *out);

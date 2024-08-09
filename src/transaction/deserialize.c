@@ -17,7 +17,7 @@
 
 #include "deserialize.h"
 #include "types.h"
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "hash.h"
 #include "../common/cell.h"
 #include "transaction_hints.h"

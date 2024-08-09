@@ -4,7 +4,7 @@
 #include <sys/types.h>
 
 extern "C" {
-#include "common/buffer.h"
+#include "common/mybuffer.h"
 #include "transaction/deserialize.h"
 #include "transaction/types.h"
 }

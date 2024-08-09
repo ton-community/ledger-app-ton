@@ -7,7 +7,7 @@
 
 #include <cmocka.h>
 
-#include "common/write.h"
+#include "write.h"
 
 static void test_write(void **state) {
     (void) state;

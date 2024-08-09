@@ -3,7 +3,7 @@
 
 #include "transaction_hints.h"
 
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../common/base64.h"
 #include "../common/format_bigint.h"
 #include "../common/format_address.h"
