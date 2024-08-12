@@ -29,60 +29,16 @@ void app_quit(void) {
     os_sched_exit(-1);
 }
 
-void ui_menu_main(void) {
-    nbgl_useCaseHome(APPNAME, &C_ledger_stax_ton_64, NULL, true, ui_menu_about, app_quit);
-}
-
 // 'About' menu
-
-static const char *const INFO_TYPES[] = {"Version", "Developer"};
-static const char *const INFO_CONTENTS[] = {APPVERSION, "TonTech"};
 
 enum {
     BLIND_SIGNING_TOKEN = FIRST_USER_TOKEN,
     EXPERT_MODE_TOKEN,
 };
 
-static nbgl_layoutSwitch_t switches[2];
-
-static bool nav_callback(uint8_t page, nbgl_pageContent_t *content) {
-    switch (page) {
-        case 0: {
-            content->type = INFOS_LIST;
-            content->infosList.nbInfos = 2;
-            content->infosList.infoTypes = (const char **) INFO_TYPES;
-            content->infosList.infoContents = (const char **) INFO_CONTENTS;
-            break;
-        }
-        case 1: {
-            int sw = 0;
-            switches[sw++] = (nbgl_layoutSwitch_t){
-                .initState = N_storage.blind_signing_enabled ? ON_STATE : OFF_STATE,
-                .text = "Blind signing",
-                .subText = "Enable transaction blind\nsigning",
-                .token = BLIND_SIGNING_TOKEN,
-                .tuneId = TUNE_TAP_CASUAL};
-            switches[sw++] = (nbgl_layoutSwitch_t){
-                .initState = N_storage.expert_mode ? ON_STATE : OFF_STATE,
-                .text = "Expert mode",
-                .subText = "Show more information\nwhen reviewing transactions",
-                .token = EXPERT_MODE_TOKEN,
-                .tuneId = TUNE_TAP_CASUAL};
-            content->type = SWITCHES_LIST;
-            content->switchesList.nbSwitches = sw;
-            content->switchesList.switches = switches;
-            break;
-        }
-        default: {
-            return false;
-        }
-    }
-
-    return true;
-}
-
-static void controls_callback(int token, uint8_t index) {
+static void controls_callback(int token, uint8_t index, int page) {
     (void) index;
+    (void) page;
     bool value;
     switch (token) {
         case BLIND_SIGNING_TOKEN:
@@ -96,22 +52,64 @@ static void controls_callback(int token, uint8_t index) {
     }
 }
 
-static void ui_menu_settings_common() {
-    nbgl_useCaseSettings(APPNAME " settings",
-                         0,
-                         2,
-                         false,
-                         ui_menu_main,
-                         nav_callback,
-                         controls_callback);
+enum { MY_SWITCH_1_ID = 0, MY_SWITCH_2_ID, SETTINGS_SWITCHES_NB };
+
+static nbgl_contentSwitch_t switches[SETTINGS_SWITCHES_NB] = {0};
+
+static void initialize_switches() {
+    switches[MY_SWITCH_1_ID].initState = N_storage.blind_signing_enabled ? ON_STATE : OFF_STATE;
+    switches[MY_SWITCH_1_ID].text = "Blind signing";
+    switches[MY_SWITCH_1_ID].subText = "Enable transaction blind\nsigning";
+    switches[MY_SWITCH_1_ID].token = BLIND_SIGNING_TOKEN;
+    switches[MY_SWITCH_1_ID].tuneId = TUNE_TAP_CASUAL;
+
+    switches[MY_SWITCH_2_ID].initState = N_storage.expert_mode ? ON_STATE : OFF_STATE;
+    switches[MY_SWITCH_2_ID].text = "Expert mode";
+    switches[MY_SWITCH_2_ID].subText = "Show more information\nwhen reviewing transactions";
+    switches[MY_SWITCH_2_ID].token = EXPERT_MODE_TOKEN;
+    switches[MY_SWITCH_2_ID].tuneId = TUNE_TAP_CASUAL;
+}
+
+static const nbgl_content_t contents[] = {
+    {
+        .type = SWITCHES_LIST,
+        .content.switchesList.switches = switches,
+        .content.switchesList.nbSwitches = SETTINGS_SWITCHES_NB,
+        .contentActionCallback = controls_callback,
+    },
+};
+
+static const nbgl_genericContents_t settingsContents = {
+    .callbackCallNeeded = false,
+    .contentsList = contents,
+    .nbContents = 1,
+};
+
+static const char *const INFO_TYPES[] = {"Version", "Developer"};
+static const char *const INFO_CONTENTS[] = {APPVERSION, "TonTech"};
+
+static const nbgl_contentInfoList_t infoContents = {
+    .infoTypes = INFO_TYPES,
+    .infoContents = INFO_CONTENTS,
+    .nbInfos = 2,
+};
+
+static void ui_menu_common(uint8_t initPage) {
+    initialize_switches();
+
+    nbgl_useCaseHomeAndSettings(APPNAME, &C_ledger_stax_ton_64, NULL, initPage, &settingsContents, &infoContents, NULL, app_quit);
+}
+
+void ui_menu_main(void) {
+    ui_menu_common(INIT_HOME_PAGE);
 }
 
 void ui_menu_settings() {
-    ui_menu_settings_common();
+    ui_menu_common(0);
 }
 
 void ui_menu_about() {
-    ui_menu_settings_common();
+    ui_menu_common(1);
 }
 
 #endif

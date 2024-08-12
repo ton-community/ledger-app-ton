@@ -27,7 +27,7 @@ def test_get_public_key_confirm_accepted(firmware, backend, navigator, test_name
                                                       test_name)
         else:
             instructions = [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavIns(NavInsID.TOUCH, (65, 520) if firmware.device == "stax" else (80, 440)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
@@ -51,7 +51,7 @@ def test_get_public_key_confirm_accepted_v3r2(firmware, backend, navigator, test
                                                       test_name)
         else:
             instructions = [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavIns(NavInsID.TOUCH, (65, 520) if firmware.device == "stax" else (80, 440)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CONFIRM,
@@ -85,7 +85,7 @@ def test_get_public_key_confirm_refused(firmware, backend, navigator, test_name)
                 NavInsID.USE_CASE_REVIEW_REJECT,
             ],
             [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
             ]
         ]

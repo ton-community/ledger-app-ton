@@ -22,28 +22,13 @@
 
 static char g_address[G_ADDRESS_LEN];
 
-static void confirm_address_rejection(void) {
-    // display a status page and go back to main
-    ui_action_validate_pubkey(false);
-    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_menu_main);
-}
-
-static void confirm_address_approval(void) {
-    // display a success status page and go back to main
-    ui_action_validate_pubkey(true);
-    nbgl_useCaseStatus("ADDRESS\nVERIFIED", true, ui_menu_main);
-}
-
 static void review_choice(bool confirm) {
+    ui_action_validate_pubkey(confirm);
     if (confirm) {
-        confirm_address_approval();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
     } else {
-        confirm_address_rejection();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
-}
-
-static void continue_review(void) {
-    nbgl_useCaseAddressConfirmation(g_address, review_choice);
 }
 
 int ui_display_address(uint8_t flags) {
@@ -57,12 +42,7 @@ int ui_display_address(uint8_t flags) {
         return -1;
     }
 
-    nbgl_useCaseReviewStart(&C_ledger_stax_ton_64,
-                            "Verify TON address",
-                            NULL,
-                            "Cancel",
-                            continue_review,
-                            confirm_address_rejection);
+    nbgl_useCaseAddressReview(g_address, NULL, &C_ledger_stax_ton_64, "Verify TON address", NULL, review_choice);
 
     return 0;
 }

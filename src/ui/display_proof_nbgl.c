@@ -22,40 +22,18 @@
 #include "menu.h"
 #include "helpers/display_proof.h"
 
-static nbgl_layoutTagValue_t pair;
-static nbgl_layoutTagValueList_t pairList;
+static nbgl_contentTagValue_t pair;
+static nbgl_contentTagValueList_t pairList;
 static char g_address[G_ADDRESS_LEN];
 static char g_domain[MAX_DOMAIN_LEN + 1];
 
-static void confirm_address_rejection(void) {
-    // display a status page and go back to main
-    ui_action_validate_proof(false);
-    nbgl_useCaseStatus("Address verification\ncancelled", false, ui_menu_main);
-}
-
-static void confirm_address_approval(void) {
-    // display a success status page and go back to main
-    ui_action_validate_proof(true);
-    nbgl_useCaseStatus("ADDRESS\nVERIFIED", true, ui_menu_main);
-}
-
 static void review_choice(bool confirm) {
+    ui_action_validate_proof(confirm);
     if (confirm) {
-        confirm_address_approval();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_VERIFIED, ui_menu_main);
     } else {
-        confirm_address_rejection();
+        nbgl_useCaseReviewStatus(STATUS_TYPE_ADDRESS_REJECTED, ui_menu_main);
     }
-}
-
-static void continue_review(void) {
-    pair.item = "App domain";
-    pair.value = g_domain;
-
-    pairList.nbPairs = 1;
-    pairList.nbMaxLinesForValue = 0;
-    pairList.pairs = &pair;
-
-    nbgl_useCaseAddressConfirmationExt(g_address, review_choice, &pairList);
 }
 
 int ui_display_proof(uint8_t flags) {
@@ -68,12 +46,14 @@ int ui_display_proof(uint8_t flags) {
         return -1;
     }
 
-    nbgl_useCaseReviewStart(&C_ledger_stax_ton_64,
-                            "Verify TON address\nto application",
-                            NULL,
-                            "Cancel",
-                            continue_review,
-                            confirm_address_rejection);
+    pair.item = "App domain";
+    pair.value = g_domain;
+
+    pairList.nbPairs = 1;
+    pairList.nbMaxLinesForValue = 0;
+    pairList.pairs = &pair;
+
+    nbgl_useCaseAddressReview(g_address, &pairList, &C_ledger_stax_ton_64, "Verify TON address\nto application", NULL, review_choice);
 
     return 0;
 }

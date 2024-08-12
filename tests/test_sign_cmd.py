@@ -42,7 +42,7 @@ def test_sign_tx_no_payload(firmware, backend, navigator, test_name):
                                                       test_name)
         else:
             navigator.navigate([
-                                   NavInsID.SWIPE_CENTER_TO_RIGHT,
+                                   NavInsID.SWIPE_CENTER_TO_LEFT,
                                ])
             navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                       [NavInsID.USE_CASE_REVIEW_CONFIRM,
@@ -150,7 +150,6 @@ def test_sign_tx_with_payload(firmware, backend, navigator, test_name):
                                         test_name + "/pretest",
                                         [
                                             NavInsID.USE_CASE_HOME_INFO,
-                                            NavInsID.USE_CASE_SETTINGS_NEXT,
                                             NavIns(NavInsID.TOUCH, (354, 125)),
                                             NavIns(NavInsID.TOUCH, (354, 272)),
                                             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
@@ -175,10 +174,14 @@ def test_sign_tx_with_payload(firmware, backend, navigator, test_name):
                                                             test_name + f"/part{i}")
             else:
                 instructions = [
-                    NavInsID.SWIPE_CENTER_TO_RIGHT,
+                    NavInsID.SWIPE_CENTER_TO_LEFT,
                 ]
                 if i == 0:
-                    instructions += [NavInsID.SWIPE_CENTER_TO_RIGHT]
+                    pre = [
+                        NavInsID.USE_CASE_CHOICE_REJECT,
+                        NavInsID.USE_CASE_CHOICE_CONFIRM,
+                    ]
+                    instructions = pre + instructions
                 navigator.navigate(instructions)
                 navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,
@@ -232,7 +235,6 @@ def test_sign_tx_subwallet_id(firmware, backend, navigator, test_name):
                                         test_name + "/pretest",
                                         [
                                             NavInsID.USE_CASE_HOME_INFO,
-                                            NavInsID.USE_CASE_SETTINGS_NEXT,
                                             NavIns(NavInsID.TOUCH, (354, 125)),
                                             NavIns(NavInsID.TOUCH, (354, 272)),
                                             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
@@ -257,10 +259,14 @@ def test_sign_tx_subwallet_id(firmware, backend, navigator, test_name):
                                                             test_name + f"/part{i}")
             else:
                 instructions = [
-                    NavInsID.SWIPE_CENTER_TO_RIGHT,
+                    NavInsID.SWIPE_CENTER_TO_LEFT,
                 ]
                 if i == 1:
-                    instructions += [NavInsID.SWIPE_CENTER_TO_RIGHT]
+                    pre = [
+                        NavInsID.USE_CASE_CHOICE_REJECT,
+                        NavInsID.USE_CASE_CHOICE_CONFIRM,
+                    ]
+                    instructions = pre + instructions
                 navigator.navigate(instructions)
                 navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,
@@ -303,7 +309,7 @@ def test_sign_tx_refused(firmware, backend, navigator, test_name):
         for i in range(3):
             instructions = []
             if i > 0:
-                instructions += [NavInsID.SWIPE_CENTER_TO_RIGHT]
+                instructions += [NavInsID.SWIPE_CENTER_TO_LEFT]
                 instructions += [NavInsID.USE_CASE_VIEW_DETAILS_NEXT] * (i-1)
             instructions += [NavInsID.USE_CASE_REVIEW_REJECT,
                              NavInsID.USE_CASE_CHOICE_CONFIRM,
@@ -389,7 +395,6 @@ def test_sign_tx_clear_jetton(firmware, backend, navigator, test_name):
                                         test_name + "/pretest",
                                         [
                                             NavInsID.USE_CASE_HOME_INFO,
-                                            NavInsID.USE_CASE_SETTINGS_NEXT,
                                             NavIns(NavInsID.TOUCH, (354, 125)),
                                             NavIns(NavInsID.TOUCH, (354, 272)),
                                             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
@@ -415,7 +420,7 @@ def test_sign_tx_clear_jetton(firmware, backend, navigator, test_name):
                                                             test_name + f"/part{i}")
             else:
                 navigator.navigate([
-                                       NavInsID.SWIPE_CENTER_TO_RIGHT,
+                                       NavInsID.SWIPE_CENTER_TO_LEFT,
                                    ])
                 navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,

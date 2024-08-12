@@ -39,7 +39,7 @@ def test_sign_data(firmware, backend, navigator, test_name):
                                                             test_name + f"/part{i}")
             else:
                 navigator.navigate([
-                                       NavInsID.SWIPE_CENTER_TO_RIGHT,
+                                       NavInsID.SWIPE_CENTER_TO_LEFT,
                                    ])
                 navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                                                             [NavInsID.USE_CASE_REVIEW_CONFIRM,
@@ -80,9 +80,10 @@ def test_sign_data_refused(firmware, backend, navigator, test_name):
         for i in range(3):
             instructions = []
             if i > 0:
-                instructions += [NavInsID.SWIPE_CENTER_TO_RIGHT]
+                instructions += [NavInsID.SWIPE_CENTER_TO_LEFT]
                 instructions += [NavInsID.USE_CASE_VIEW_DETAILS_NEXT] * (i-1)
             instructions += [NavInsID.USE_CASE_REVIEW_REJECT,
+                             NavInsID.USE_CASE_CHOICE_CONFIRM,
                              NavInsID.USE_CASE_STATUS_DISMISS]
             with pytest.raises(ExceptionRAPDU) as e:
                 with client.sign_data(path=path, data=rb):

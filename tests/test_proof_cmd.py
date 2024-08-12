@@ -25,7 +25,7 @@ def test_get_proof_accepted(firmware, backend, navigator, test_name):
                                                       test_name)
         else:
             instructions = [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavIns(NavInsID.TOUCH, (200, 250)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
@@ -56,7 +56,7 @@ def test_get_proof_accepted_v3r2(firmware, backend, navigator, test_name):
                                                       test_name)
         else:
             instructions = [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavIns(NavInsID.TOUCH, (200, 250)),
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_EXIT_QR,
                 NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
@@ -94,11 +94,11 @@ def test_get_proof_refused(firmware, backend, navigator, test_name):
                 NavInsID.USE_CASE_REVIEW_REJECT,
             ],
             [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
             ],
             [
-                NavInsID.SWIPE_CENTER_TO_RIGHT,
+                NavInsID.SWIPE_CENTER_TO_LEFT,
                 NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
                 NavInsID.USE_CASE_ADDRESS_CONFIRMATION_CANCEL,
             ]

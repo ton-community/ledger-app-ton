@@ -30,39 +30,54 @@ static char g_payload[G_PAYLOAD_LEN];
 static char g_address_title[G_ADDRESS_TITLE_LEN];
 
 static char g_transaction_title[64];
+static char g_transaction_finish_title[64];
 
-static nbgl_layoutTagValue_t pairs[3 + MAX_HINTS];
-static nbgl_layoutTagValueList_t pairList;
+static nbgl_contentTagValue_t pairs[3 + MAX_HINTS];
+static nbgl_contentTagValueList_t pairList;
 
-static nbgl_pageInfoLongPress_t infoLongPress;
+static void on_transaction_accepted() {
+    ui_action_validate_transaction(true);
+    nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_SIGNED, ui_menu_main);
+}
 
-static void confirm_transaction_rejection(void) {
-    // display a status page and go back to main
+static void on_transaction_rejected() {
     ui_action_validate_transaction(false);
-    nbgl_useCaseStatus("Transaction rejected", false, ui_menu_main);
+    nbgl_useCaseReviewStatus(STATUS_TYPE_TRANSACTION_REJECTED, ui_menu_main);
 }
 
-static void ask_rejection_confirmation(void) {
-    // display a choice to confirm/cancel rejection
-    nbgl_useCaseConfirm("Reject transaction?",
-                        NULL,
-                        "Yes, reject",
-                        "Go back to transaction",
-                        confirm_transaction_rejection);
-}
-
-// called when long press button on 3rd page is long-touched or when reject footer is touched
 static void on_review_choice(bool confirm) {
     if (confirm) {
-        // display a status page and go back to main
-        ui_action_validate_transaction(true);
-        nbgl_useCaseStatus("TRANSACTION\nSIGNED", true, ui_menu_main);
+        on_transaction_accepted();
     } else {
-        ask_rejection_confirmation();
+        on_transaction_rejected();
     }
 }
 
-static void start_regular_review(void) {
+static void ui_start_review() {
+    if (!display_transaction(g_operation,
+                             sizeof(g_operation),
+                             g_amount,
+                             sizeof(g_amount),
+                             g_address,
+                             sizeof(g_address),
+                             g_payload,
+                             sizeof(g_payload),
+                             g_address_title,
+                             sizeof(g_address_title))) {
+        io_send_sw(SW_BAD_STATE);
+        return;
+    }
+
+    snprintf(g_transaction_title,
+             sizeof(g_transaction_title),
+             "Review transaction\nto %s",
+             G_context.tx_info.transaction.action);
+
+    snprintf(g_transaction_finish_title,
+             sizeof(g_transaction_finish_title),
+             "Sign transaction\nto %s",
+             G_context.tx_info.transaction.action);
+
     int pairIndex = 0;
 
     pairs[pairIndex].item = "Transaction type";
@@ -89,31 +104,47 @@ static void start_regular_review(void) {
     pairList.nbPairs = pairIndex + G_context.tx_info.transaction.hints.hints_count;
     pairList.smallCaseForValue = false;
 
-    snprintf(g_transaction_title,
-             sizeof(g_transaction_title),
-             "Sign transaction\nto %s",
-             G_context.tx_info.transaction.action);
+    nbgl_opType_t op = TYPE_TRANSACTION;
+    if (G_context.tx_info.transaction.is_blind) {
+        op |= BLIND_OPERATION;
+    }
 
-    infoLongPress.icon = &C_ledger_stax_ton_64;
-    infoLongPress.text = g_transaction_title;
-    infoLongPress.longPressText = "Hold to sign";
-
-    nbgl_useCaseStaticReview(&pairList, &infoLongPress, "Reject transaction", on_review_choice);
+    nbgl_useCaseReview(op, &pairList, &C_ledger_stax_ton_64, g_transaction_title, NULL, g_transaction_finish_title, on_review_choice);
 }
 
-static void show_blind_warning_if_needed(void) {
-    if (G_context.tx_info.transaction.is_blind) {
-        nbgl_useCaseReviewStart(
-            &C_Important_Circle_64px,
-            "Blind Signing",
-            "This transaction cannot be\nsecurely interpreted by Ledger\nStax. It might put "
-            "your assets\nat risk.",
-            "Reject transaction",
-            start_regular_review,
-            ask_rejection_confirmation);
+static void on_blind_choice2(bool proceed) {
+    if (proceed) {
+        ui_start_review();
     } else {
-        start_regular_review();
+        on_transaction_rejected();
     }
+}
+
+static void on_blind_choice1(bool back_to_safety) {
+    if (back_to_safety) {
+        on_transaction_rejected();
+    } else {
+        nbgl_useCaseChoice(
+            NULL,
+            "Blind Signing",
+            "This transaction cannot be\nsecurely interpreted by Ledger. It might put "
+            "your assets\nat risk.",
+            "I accept the risk",
+            "Reject transaction",
+            on_blind_choice2
+        );
+    }
+}
+
+static void ui_show_blind_warning() {
+    nbgl_useCaseChoice(
+        &C_Warning_64px,
+        "Security risk detected",
+        "It may not be safe to sign this transaction. To continue, you'll need to review the risk.",
+        "Back to safety",
+        "Review risk",
+        on_blind_choice1
+    );
 }
 
 // Public function to start the transaction review
@@ -126,31 +157,11 @@ int ui_display_transaction() {
         return io_send_sw(SW_BAD_STATE);
     }
 
-    if (!display_transaction(g_operation,
-                             sizeof(g_operation),
-                             g_amount,
-                             sizeof(g_amount),
-                             g_address,
-                             sizeof(g_address),
-                             g_payload,
-                             sizeof(g_payload),
-                             g_address_title,
-                             sizeof(g_address_title))) {
-        return -1;
+    if (G_context.tx_info.transaction.is_blind) {
+        ui_show_blind_warning();
+    } else {
+        ui_start_review();
     }
-
-    snprintf(g_transaction_title,
-             sizeof(g_transaction_title),
-             "Review transaction\nto %s",
-             G_context.tx_info.transaction.action);
-
-    // Start review
-    nbgl_useCaseReviewStart(&C_ledger_stax_ton_64,
-                            g_transaction_title,
-                            NULL,
-                            "Reject transaction",
-                            show_blind_warning_if_needed,
-                            ask_rejection_confirmation);
 
     return 0;
 }
