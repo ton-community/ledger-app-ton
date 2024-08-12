@@ -42,7 +42,12 @@ int ui_display_address(uint8_t flags) {
         return -1;
     }
 
-    nbgl_useCaseAddressReview(g_address, NULL, &C_ledger_stax_ton_64, "Verify TON address", NULL, review_choice);
+    nbgl_useCaseAddressReview(g_address,
+                              NULL,
+                              &C_ledger_stax_ton_64,
+                              "Verify TON address",
+                              NULL,
+                              review_choice);
 
     return 0;
 }

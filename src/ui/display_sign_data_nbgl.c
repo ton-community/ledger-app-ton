@@ -42,7 +42,13 @@ int ui_display_sign_data() {
     pairList.nbPairs = G_context.sign_data_info.hints.hints_count;
     pairList.smallCaseForValue = false;
 
-    nbgl_useCaseReview(TYPE_MESSAGE, &pairList, &C_ledger_stax_ton_64, "Sign custom data", NULL, "Sign custom data", on_review_choice);
+    nbgl_useCaseReview(TYPE_MESSAGE,
+                       &pairList,
+                       &C_ledger_stax_ton_64,
+                       "Sign custom data",
+                       NULL,
+                       "Sign custom data",
+                       on_review_choice);
 
     return 0;
 }

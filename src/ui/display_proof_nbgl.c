@@ -53,7 +53,12 @@ int ui_display_proof(uint8_t flags) {
     pairList.nbMaxLinesForValue = 0;
     pairList.pairs = &pair;
 
-    nbgl_useCaseAddressReview(g_address, &pairList, &C_ledger_stax_ton_64, "Verify TON address\nto application", NULL, review_choice);
+    nbgl_useCaseAddressReview(g_address,
+                              &pairList,
+                              &C_ledger_stax_ton_64,
+                              "Verify TON address\nto application",
+                              NULL,
+                              review_choice);
 
     return 0;
 }

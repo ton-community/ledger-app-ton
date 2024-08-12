@@ -97,7 +97,14 @@ static const nbgl_contentInfoList_t infoContents = {
 static void ui_menu_common(uint8_t initPage) {
     initialize_switches();
 
-    nbgl_useCaseHomeAndSettings(APPNAME, &C_ledger_stax_ton_64, NULL, initPage, &settingsContents, &infoContents, NULL, app_quit);
+    nbgl_useCaseHomeAndSettings(APPNAME,
+                                &C_ledger_stax_ton_64,
+                                NULL,
+                                initPage,
+                                &settingsContents,
+                                &infoContents,
+                                NULL,
+                                app_quit);
 }
 
 void ui_menu_main(void) {

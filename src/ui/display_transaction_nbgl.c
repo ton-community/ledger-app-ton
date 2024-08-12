@@ -109,7 +109,13 @@ static void ui_start_review() {
         op |= BLIND_OPERATION;
     }
 
-    nbgl_useCaseReview(op, &pairList, &C_ledger_stax_ton_64, g_transaction_title, NULL, g_transaction_finish_title, on_review_choice);
+    nbgl_useCaseReview(op,
+                       &pairList,
+                       &C_ledger_stax_ton_64,
+                       g_transaction_title,
+                       NULL,
+                       g_transaction_finish_title,
+                       on_review_choice);
 }
 
 static void on_blind_choice2(bool proceed) {
@@ -131,8 +137,7 @@ static void on_blind_choice1(bool back_to_safety) {
             "your assets\nat risk.",
             "I accept the risk",
             "Reject transaction",
-            on_blind_choice2
-        );
+            on_blind_choice2);
     }
 }
 
@@ -143,8 +148,7 @@ static void ui_show_blind_warning() {
         "It may not be safe to sign this transaction. To continue, you'll need to review the risk.",
         "Back to safety",
         "Review risk",
-        on_blind_choice1
-    );
+        on_blind_choice1);
 }
 
 // Public function to start the transaction review
