@@ -22,7 +22,7 @@
 
 #include "../proof/proof_deserialize.h"
 #include "../globals.h"
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../ui/display.h"
 
 int handler_get_address_proof(uint8_t flags, buffer_t *cdata) {

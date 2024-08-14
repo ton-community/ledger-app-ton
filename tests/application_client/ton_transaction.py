@@ -95,7 +95,9 @@ class JettonTransferPayload(Payload):
                  query_id: Optional[int] = None,
                  custom_payload: Optional[Cell] = None,
                  forward_amount: int = 0,
-                 forward_payload: Optional[Cell] = None) -> None:
+                 forward_payload: Optional[Cell] = None,
+                 jetton_id: Optional[int] = None,
+                 owner_workchain: int = 0) -> None:
         self.query_id: int = query_id if query_id is not None else 0
         self.amount: int = amount
         self.destination: Address = to
@@ -105,13 +107,23 @@ class JettonTransferPayload(Payload):
         self.custom_payload: Optional[Cell] = custom_payload
         self.forward_amount: int = forward_amount
         self.forward_payload: Optional[Cell] = forward_payload
+        self.jetton_id: Optional[int] = jetton_id
+        self.owner_workchain = owner_workchain
 
     def to_request_bytes(self) -> bytes:
+        flags = 0
+        if self.query_id != 0:
+            flags |= 1
+        if self.jetton_id is not None:
+            flags |= 2
+
         main_body = b"".join([
+            bytes([flags]),
+            self.query_id.to_bytes(8, byteorder="big") if self.query_id != 0 else bytes([]),
             (b"".join([
-                bytes([1]),
-                self.query_id.to_bytes(8, byteorder="big")
-            ]) if self.query_id != 0 else bytes([0])),
+                self.jetton_id.to_bytes(2, byteorder="big"),
+                bytes([self.owner_workchain]),
+            ])) if self.jetton_id is not None else bytes([]),
             write_varuint(self.amount),
             write_address(self.destination),
             write_address(self.response_destionation),

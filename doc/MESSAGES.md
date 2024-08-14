@@ -45,8 +45,10 @@ transfer#0f8a7ea5 query_id:uint64 amount:(VarUInteger 16) destination:MsgAddress
 ### Hints
 | Value | Length or type | Description |
 | --- | --- | --- |
-| `has_query_id` | 1 | Whether `query_id` is present |
-| `query_id` | 0 or 8 | `query_id` for the message, 0 will be used if `!has_query_id` |
+| `flags` | 1 | Bit +1 - whether `query_id` is present, bit +2 - whether this is a known jetton (bit +2 is not available on nano S) |
+| `query_id` | 0 or 8 | `query_id` for the message, 0 will be used if not present. Present only when `flags & 1` |
+| `jetton_id` | 0 or 2 | ID of the known jetton. Present only when `flags & 2` |
+| `owner_workchain` | 0 or 1 | Workchain of owner. Present only when `flags & 2` |
 | `amount` | `varuint` | Jetton amount |
 | `destination` | `address` | Whom to transfer jettons to |
 | `response_destination` | `address` | Whom to transfer the excess of TON to |

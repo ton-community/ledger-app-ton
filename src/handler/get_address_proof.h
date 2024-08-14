@@ -3,7 +3,7 @@
 #include <stdbool.h>  // bool
 #include <stdint.h>   // uint*_t
 
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 
 /**
  * Handler for GET_ADDRESS_PROOF command. If successfully parse BIP32 path,

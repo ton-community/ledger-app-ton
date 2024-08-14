@@ -32,9 +32,9 @@ def test_app_settings(firmware, backend, navigator, test_name):
                                         test_name,
                                         [
                                             NavInsID.USE_CASE_HOME_INFO,
-                                            NavInsID.USE_CASE_SETTINGS_NEXT,
                                             NavIns(NavInsID.TOUCH, (354, 125)),
                                             NavIns(NavInsID.TOUCH, (354, 272)),
+                                            NavInsID.USE_CASE_SETTINGS_NEXT,
                                             NavInsID.USE_CASE_SETTINGS_MULTI_PAGE_EXIT,
                                         ],
                                         screen_change_before_first_instruction=False)

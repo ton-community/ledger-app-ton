@@ -2,7 +2,7 @@ from application_client.ton_command_sender import BoilerplateCommandSender
 from application_client.ton_response_unpacker import unpack_get_version_response
 
 MAJOR = 2
-MINOR = 1
+MINOR = 3
 PATCH = 0
 
 # In this test we check the behavior of the device when asked to provide the app version

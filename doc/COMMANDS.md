@@ -47,12 +47,13 @@
 Use P2 to control what kind of address to present to user:
 * set bit 0x01 to make address testnet only
 * set bit 0x02 to use masterchain instead of basechain for the address
+* set bit 0x04 to include is_v3r2 flag and subwallet_id
 
 The bip32 path must be at least 3 elements long and must start with the prefix `m/44'/607'/`.
 
 | CLA | INS | P1 | P2 | Lc | CData |
 | --- | --- | --- | --- | --- | --- |
-| 0xE0 | 0x05 | 0x00 (no display) <br> 0x01 (display) | 0x00-0x03 | 1 + 4n | `len(bip32_path) (1)` \|\|<br> `bip32_path{1} (4)` \|\|<br>`...` \|\|<br>`bip32_path{n} (4)` |
+| 0xE0 | 0x05 | 0x00 (no display) <br> 0x01 (display) | 0x00-0x07 | 1 + 4n + (0 or 5) | `len(bip32_path) (1)` \|\|<br> `bip32_path{1} (4)` \|\|<br>`...` \|\|<br>`bip32_path{n} (4)` \|\|<br> (if `P2 & 0x04`) `is_v3r2 (1)` (`0x00` or `0x01`) \|\|<br> (if `P2 & 0x04`) `subwallet_id (4)` |
 
 ### Response
 
@@ -89,6 +90,7 @@ Then an arbitrary number of chunks with transaction data (see [TRANSACTION.md](.
 Use P2 to control what kind of address to present to user:
 * set bit 0x01 to make address testnet only
 * set bit 0x02 to use masterchain instead of basechain for the address
+* set bit 0x04 to include is_v3r2 flag and subwallet_id
 
 The bip32 path must be at least 3 elements long and must start with the prefix `m/44'/607'/`.
 
@@ -98,7 +100,7 @@ Proofs are generated according to this [spec](https://github.com/ton-blockchain/
 
 | CLA | INS | P1 | P2 | Lc | CData |
 | --- | --- | --- | --- | --- | --- |
-| 0xE0 | 0x08 | 0x01 | 0x00-0x03 | 1 + 4n + 1 + d + 8 + p | `len(bip32_path) (1)` \|\|<br> `bip32_path{1} (4)` \|\|<br>`...` \|\|<br>`bip32_path{n} (4)` \|\|<br> `len(app_domain) == d (1)` \|\|<br> `app_domain (d)` \|\|<br> `timestamp (8)` \|\|<br> `payload (p)` |
+| 0xE0 | 0x08 | 0x01 | 0x00-0x03 | 1 + 4n + 1 + d + 8 + p | `len(bip32_path) (1)` \|\|<br> `bip32_path{1} (4)` \|\|<br>`...` \|\|<br>`bip32_path{n} (4)` \|\|<br> (if `P2 & 0x04`) `is_v3r2 (1)` (`0x00` or `0x01`) \|\|<br> (if `P2 & 0x04`) `subwallet_id (4)` \|\|<br> `len(app_domain) == d (1)` \|\|<br> `app_domain (d)` \|\|<br> `timestamp (8)` \|\|<br> `payload (p)` |
 
 ### Response
 

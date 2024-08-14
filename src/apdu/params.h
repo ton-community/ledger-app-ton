@@ -41,6 +41,12 @@
 #define P2_ADDR_FLAG_MASTERCHAIN 0x02
 
 /**
+ * P2 bit indicating that wallet specifiers (subwallet_id and version) are present.
+ */
+#define P2_ADDR_FLAG_WALLET_SPECIFIERS 0x04
+
+/**
  * P2 containing all address display bits.
  */
-#define P2_ADDR_FLAGS_MAX (P2_ADDR_FLAG_TESTNET | P2_ADDR_FLAG_MASTERCHAIN)
+#define P2_ADDR_FLAGS_MAX \
+    (P2_ADDR_FLAG_TESTNET | P2_ADDR_FLAG_MASTERCHAIN | P2_ADDR_FLAG_WALLET_SPECIFIERS)

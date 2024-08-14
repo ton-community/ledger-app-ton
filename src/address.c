@@ -77,6 +77,11 @@ const uint8_t root_header[] = {
     0xd5,
     0xc0};
 
+const uint8_t v3r2_root_header[] = {0x2,  0x1,  0x34, 0x0,  0x0,  0x0,  0x0,  0x84, 0xda, 0xfa,
+                                    0x44, 0x9f, 0x98, 0xa6, 0x98, 0x77, 0x89, 0xba, 0x23, 0x23,
+                                    0x58, 0x7,  0x2b, 0xc0, 0xf7, 0x6d, 0xc4, 0x52, 0x40, 0x2,
+                                    0xa5, 0xd0, 0x91, 0x8b, 0x9a, 0x75, 0xd2, 0xd5, 0x99};
+
 const uint8_t data_header[] = {
     0x00,
     0x51,  // Cell header
@@ -84,17 +89,26 @@ const uint8_t data_header[] = {
     0x00,
     0x00,
     0x00,  // Seqno
-    0x29,
-    0xa9,
-    0xa3,
-    0x17,  // Wallet ID
+};
+
+const uint8_t v3r2_data_header[] = {
+    0x00,
+    0x50,  // Cell header
+    0x00,
+    0x00,
+    0x00,
+    0x00,  // Seqno
 };
 
 const uint8_t data_tail[] = {
     0x40  // zero bit + padding
 };
 
-bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN], uint8_t *out, size_t out_len) {
+bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN],
+                    const uint32_t subwallet_id,
+                    const bool is_v3r2,
+                    uint8_t *out,
+                    size_t out_len) {
     if (out_len != HASH_LEN) {
         return false;
     }
@@ -102,20 +116,54 @@ bool pubkey_to_hash(const uint8_t public_key[static PUBKEY_LEN], uint8_t *out, s
     uint8_t inner[HASH_LEN] = {0};
     cx_sha256_t state;
 
+    uint8_t subwallet_buf[4];
+    subwallet_buf[0] = (subwallet_id >> 24) & 0xff;
+    subwallet_buf[1] = (subwallet_id >> 16) & 0xff;
+    subwallet_buf[2] = (subwallet_id >> 8) & 0xff;
+    subwallet_buf[3] = subwallet_id & 0xff;
+
     // Hash init data cell bits
     SAFE(cx_sha256_init_no_throw(&state));
-    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, data_header, sizeof(data_header), NULL, 0));
-    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, public_key, PUBKEY_LEN, NULL, 0));
-    SAFE(cx_hash_no_throw((cx_hash_t *) &state,
-                          CX_LAST,
-                          data_tail,
-                          sizeof(data_tail),
-                          inner,
-                          sizeof(inner)));
+    if (is_v3r2) {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state,
+                              0,
+                              v3r2_data_header,
+                              sizeof(v3r2_data_header),
+                              NULL,
+                              0));
+    } else {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, data_header, sizeof(data_header), NULL, 0));
+    }
+    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, subwallet_buf, sizeof(subwallet_buf), NULL, 0));
+    if (is_v3r2) {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state,
+                              CX_LAST,
+                              public_key,
+                              PUBKEY_LEN,
+                              inner,
+                              sizeof(inner)));
+    } else {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, public_key, PUBKEY_LEN, NULL, 0));
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state,
+                              CX_LAST,
+                              data_tail,
+                              sizeof(data_tail),
+                              inner,
+                              sizeof(inner)));
+    }
 
     // Hash root
     SAFE(cx_sha256_init_no_throw(&state));
-    SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, root_header, sizeof(root_header), NULL, 0));
+    if (is_v3r2) {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state,
+                              0,
+                              v3r2_root_header,
+                              sizeof(v3r2_root_header),
+                              NULL,
+                              0));
+    } else {
+        SAFE(cx_hash_no_throw((cx_hash_t *) &state, 0, root_header, sizeof(root_header), NULL, 0));
+    }
     SAFE(cx_hash_no_throw((cx_hash_t *) &state, CX_LAST, inner, sizeof(inner), out, out_len));
 
     return true;
@@ -125,6 +173,8 @@ bool address_from_pubkey(const uint8_t public_key[static PUBKEY_LEN],
                          const uint8_t chain,
                          const bool bounceable,
                          const bool testOnly,
+                         const uint32_t subwallet_id,
+                         const bool is_v3r2,
                          uint8_t *out,
                          size_t out_len) {
     if (out_len < ADDRESS_LEN) {
@@ -133,7 +183,7 @@ bool address_from_pubkey(const uint8_t public_key[static PUBKEY_LEN],
 
     uint8_t hash[HASH_LEN] = {0};
 
-    if (!pubkey_to_hash(public_key, hash, sizeof(hash))) {
+    if (!pubkey_to_hash(public_key, subwallet_id, is_v3r2, hash, sizeof(hash))) {
         return false;
     }
 

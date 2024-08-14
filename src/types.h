@@ -6,16 +6,7 @@
 
 #include "constants.h"
 #include "transaction/types.h"
-#include "common/bip32.h"
-
-/**
- * Enumeration for the status of IO.
- */
-typedef enum {
-    READY,     /// ready for new event
-    RECEIVED,  /// data received
-    WAITING    /// waiting
-} io_state_e;
+#include "bip32.h"
 
 /**
  * Enumeration with expected INS of APDU commands.
@@ -29,18 +20,6 @@ typedef enum {
     SIGN_DATA = 0x09,          /// sign data in TON Connect format
     GET_APP_SETTINGS = 0x0a,   /// get app settings
 } command_e;
-
-/**
- * Structure with fields of APDU command.
- */
-typedef struct {
-    uint8_t cla;    /// Instruction class
-    command_e ins;  /// Instruction code
-    uint8_t p1;     /// Instruction parameter 1
-    uint8_t p2;     /// Instruction parameter 2
-    uint8_t lc;     /// Length of command data
-    uint8_t *data;  /// Command data
-} command_t;
 
 /**
  * Enumeration with parsing state.
@@ -66,6 +45,8 @@ typedef enum {
  */
 typedef struct {
     uint8_t raw_public_key[PUBKEY_LEN];
+    bool is_v3r2;
+    uint32_t subwallet_id;
 } pubkey_ctx_t;
 
 /**
@@ -85,6 +66,8 @@ typedef struct {
 typedef struct {
     uint8_t raw_public_key[PUBKEY_LEN];
     int32_t workchain;
+    uint32_t subwallet_id;
+    bool is_v3r2;
     uint8_t domain[MAX_DOMAIN_LEN];
     uint8_t domain_len;
     uint8_t hash[HASH_LEN];

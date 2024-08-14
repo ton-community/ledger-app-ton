@@ -4,7 +4,7 @@ from typing import List
 
 from tonsdk.utils import Address
 from tonsdk.boc import Cell
-from tonsdk.contract.wallet import WalletV4ContractR2
+from tonsdk.contract.wallet import WalletV4ContractR2, WalletV3ContractR2
 
 
 TON_PROOF_PREFIX   = b"ton-proof-item-v2/"
@@ -38,6 +38,32 @@ def build_ton_proof_message(workchain: int,
                             payload: bytes) -> bytes:
     # we don't have private_key but the lib is buggy and requires it anyway
     wallet = WalletV4ContractR2(public_key=pubkey, wc=workchain, private_key=bytes())
+
+    addr = wallet.address
+    domain_b = bytes(domain, "utf8")
+    inner = b"".join([
+        TON_PROOF_PREFIX,
+        addr.wc.to_bytes(4, byteorder="big"),
+        bytes(addr.hash_part),
+        len(domain_b).to_bytes(4, byteorder="little"),
+        domain_b,
+        timestamp.to_bytes(8, byteorder="little"),
+        payload
+    ])
+    inner_hash = sha256(inner).digest()
+    return sha256(b"".join([
+        TON_CONNECT_PREFIX,
+        inner_hash
+    ])).digest()
+
+
+def build_ton_proof_message_v3r2(workchain: int,
+                            pubkey: bytes,
+                            domain: str,
+                            timestamp: int,
+                            payload: bytes) -> bytes:
+    # we don't have private_key but the lib is buggy and requires it anyway
+    wallet = WalletV3ContractR2(public_key=pubkey, wc=workchain, private_key=bytes())
 
     addr = wallet.address
     domain_b = bytes(domain, "utf8")

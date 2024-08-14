@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../types.h"
+#include "parser.h"
 
 /**
  * Dispatch APDU command received to the right handler.

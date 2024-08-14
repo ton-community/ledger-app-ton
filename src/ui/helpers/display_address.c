@@ -8,7 +8,7 @@
 #include "../../transaction/types.h"
 #include "../../address.h"
 #include "../../globals.h"
-#include "../../io.h"
+#include "io.h"
 #include "../../sw.h"
 #include "../../common/base64.h"
 #include "../../apdu/params.h"
@@ -32,6 +32,8 @@ bool display_address(uint8_t flags,
                              chain,
                              false,
                              testnet,
+                             G_context.pk_info.subwallet_id,
+                             G_context.pk_info.is_v3r2,
                              address,
                              sizeof(address))) {
         io_send_sw(SW_DISPLAY_ADDRESS_FAIL);

@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <string.h>
 
-#include "../common/buffer.h"
+#include "common/mybuffer.h"
 #include "../common/encoding.h"
 #include "../common/bits.h"
 #include "../common/cell.h"

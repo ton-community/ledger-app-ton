@@ -27,7 +27,7 @@
 
 #include "constants.h"
 #include "globals.h"
-#include "common/write.h"
+#include "write.h"
 
 static int crypto_sign(const uint32_t *bip32_path,
                        uint8_t bip32_path_len,

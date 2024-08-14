@@ -9,7 +9,7 @@
 #include "../../common/format_address.h"
 #include "../../common/encoding.h"
 #include "../../globals.h"
-#include "../../io.h"
+#include "io.h"
 #include "../../sw.h"
 #include "../../common/base64.h"
 #include "../../apdu/params.h"

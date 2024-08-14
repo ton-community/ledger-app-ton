@@ -11,6 +11,7 @@
 #include "format_bigint.h"
 #include "format_address.h"
 #include "format.h"
+#include "common/myformat.h"
 
 void add_hint_text(HintHolder_t* hints, const char* title, const char* text, size_t text_len) {
     // Configure
@@ -159,7 +160,7 @@ void print_hint(HintHolder_t* hints,
         memset(body, 0, body_len);
         base64_encode(address, sizeof(address), body, body_len);
     } else if (hint.kind == SummaryNumber) {
-        format_u64(hint.number, body, body_len);
+        format_u64_my(hint.number, body, body_len);
     } else if (hint.kind == SummaryBool) {
         snprintf(body, body_len, hint.bool_value ? "Yes" : "No");
     } else if (hint.kind == SummaryHex) {
