@@ -22,7 +22,9 @@
 
 #include "os.h"
 #include "cx.h"
+#include "swap.h"
 
+#include "validate.h"
 #include "sign_tx.h"
 #include "../sw.h"
 #include "../globals.h"
@@ -33,6 +35,7 @@
 #include "../transaction/types.h"
 #include "../transaction/deserialize.h"
 #include "../transaction/hash.h"
+#include "handle_swap_sign_transaction.h"
 
 int handler_sign_tx(buffer_t *cdata, bool first, bool more) {
     if (first) {  // first APDU, parse BIP32 path
@@ -98,5 +101,36 @@ int handler_sign_tx(buffer_t *cdata, bool first, bool more) {
 
     PRINTF("Hash: %.*H\n", sizeof(G_context.tx_info.m_hash), G_context.tx_info.m_hash);
 
-    return ui_display_transaction();
+    // If we are in swap context, do not redisplay the message data
+    // Instead, ensure they are identical with what was previously displayed
+    if (G_called_from_swap) {
+        if (G_swap_response_ready) {
+            // Safety against trying to make the app sign multiple TX
+            // This code should never be triggered as the app is supposed to exit after
+            // sending the signed transaction
+            PRINTF("Safety against double signing triggered\n");
+            os_sched_exit(-1);
+        } else {
+            // We will quit the app after this transaction, whether it succeeds or fails
+            PRINTF("Swap response is ready, the app will quit after the next send\n");
+            // This boolean will make the io_send_sw family instant reply + return to exchange
+            G_swap_response_ready = true;
+        }
+
+        if (swap_check_validity()) {
+            PRINTF("Swap response validated\n");
+            // Unreachable due to io_send_sw instant replying and quitting to Exchange in Swap mode
+            // Failsafe
+            ui_action_validate_transaction(true);
+        } else {
+            // Unreachable due to io_send_sw instant replying and quitting to Exchange in Swap mode
+            PRINTF("!swap_check_validity\n");
+            // Failsafe
+            swap_finalize_exchange_sign_transaction(false);
+        }
+
+        return 0;
+    } else {
+        return ui_display_transaction();
+    }
 }

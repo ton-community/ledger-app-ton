@@ -94,3 +94,7 @@
  * Max length for cell_inline types
  */
 #define MAX_CELL_INLINE_LEN 32
+
+#define BOUNCEABLE     0x11
+#define NON_BOUNCEABLE 0x51
+#define TESTNET_ONLY   0x80
