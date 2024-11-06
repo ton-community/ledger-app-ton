@@ -97,7 +97,6 @@ int base64url_decode(const char *src, size_t src_len, uint8_t *dest, size_t dest
             return -1;
         }
         *(dest++) = (pr2six[(uint8_t) src[2]] << 6 | pr2six[(uint8_t) src[3]] >> 0);
-        dest_len--;
     }
 
     return dest - original_dest;

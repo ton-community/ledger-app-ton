@@ -4,7 +4,7 @@
 
 #include "bip32_check.h"
 
-bool check_bip32_path(uint8_t bip32_path_len, uint32_t bip32_path[MAX_BIP32_PATH]) {
+bool check_bip32_path(uint8_t bip32_path_len, const uint32_t bip32_path[MAX_BIP32_PATH]) {
     if (bip32_path_len <= 2) return false;
 
     return bip32_path[0] == 0x8000002c && bip32_path[1] == 0x8000025f;

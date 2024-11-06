@@ -119,8 +119,6 @@ int handler_sign_tx(buffer_t *cdata, bool first, bool more) {
 
         if (swap_check_validity()) {
             PRINTF("Swap response validated\n");
-            // Unreachable due to io_send_sw instant replying and quitting to Exchange in Swap mode
-            // Failsafe
             ui_action_validate_transaction(true);
         } else {
             // Unreachable due to io_send_sw instant replying and quitting to Exchange in Swap mode

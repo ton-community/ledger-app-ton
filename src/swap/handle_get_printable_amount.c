@@ -1,5 +1,6 @@
 #ifdef HAVE_SWAP
 
+#include <string.h>  // memset, explicit_bzero
 #include "handle_swap_sign_transaction.h"
 #include "swap.h"
 #include "os.h"
@@ -47,7 +48,7 @@ void swap_handle_get_printable_amount(get_printable_amount_parameters_t* params)
     return;
 
 error:
-    memset(params->printable_amount, '\0', sizeof(params->printable_amount));
+    explicit_bzero(params->printable_amount, sizeof(params->printable_amount));
 }
 
 #endif  // HAVE_SWAP

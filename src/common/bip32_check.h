@@ -13,7 +13,7 @@
  * @return true if the BIP32 path is valid, false otherwise.
  *
  */
-bool check_bip32_path(uint8_t bip32_path_len, uint32_t bip32_path[MAX_BIP32_PATH]);
+bool check_bip32_path(uint8_t bip32_path_len, const uint32_t bip32_path[MAX_BIP32_PATH]);
 
 /**
  * Check the bip32 path stored in G_context.

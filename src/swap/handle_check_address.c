@@ -13,8 +13,10 @@
 #include "constants.h"
 #include "crc16.h"
 
-#define BASE_CHAIN   0x00
-#define MASTER_CHAIN 0xFF
+#define BASE_CHAIN             0x00
+#define MASTER_CHAIN           0xFF
+#define ADDRESS_BASE64_LENGTH  48
+#define ADDRESS_DECODED_LENGTH 36
 
 /* Set params.result to 0 on error, 1 otherwise */
 void swap_handle_check_address(check_address_parameters_t *params) {
@@ -34,8 +36,10 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
     PRINTF("Address to check %s\n", params->address_to_check);
-    if (strlen(params->address_to_check) != 48) {
-        PRINTF("Address to check expected length 48, not %d\n", strlen(params->address_to_check));
+    if (strlen(params->address_to_check) != ADDRESS_BASE64_LENGTH) {
+        PRINTF("Address to check expected length %d, not %d\n",
+               ADDRESS_BASE64_LENGTH,
+               strlen(params->address_to_check));
         return;
     }
 
@@ -66,24 +70,30 @@ void swap_handle_check_address(check_address_parameters_t *params) {
     }
     PRINTF("hash %.*H\n", HASH_LEN, hash);
 
-    char address_base64url[48];
-    if (base64_to_base64url(params->address_to_check, 48, address_base64url, 48) < 0) {
+    char address_base64url[ADDRESS_BASE64_LENGTH];
+    if (base64_to_base64url(params->address_to_check,
+                            ADDRESS_BASE64_LENGTH,
+                            address_base64url,
+                            ADDRESS_BASE64_LENGTH) < 0) {
         PRINTF("Failed to convert to base64url\n");
         return;
     }
-    uint8_t address_decoded[36];
-    int ret = base64url_decode(address_base64url, 48, address_decoded, 36);
-    if (ret != 36) {
+    uint8_t address_decoded[ADDRESS_DECODED_LENGTH];
+    int ret = base64url_decode(address_base64url,
+                               ADDRESS_BASE64_LENGTH,
+                               address_decoded,
+                               ADDRESS_DECODED_LENGTH);
+    if (ret != ADDRESS_DECODED_LENGTH) {
         PRINTF("%d\n", ret);
         PRINTF("Failed to decode\n");
         return;
     }
-    PRINTF("address_decoded = %.*H\n", 36, address_decoded);
+    PRINTF("address_decoded = %.*H\n", ADDRESS_DECODED_LENGTH, address_decoded);
 
     uint8_t flag = address_decoded[0];
     uint8_t workchain_id = address_decoded[1];
     uint8_t *account_id = &address_decoded[2];
-    uint16_t address_verification = U2BE(address_decoded, 34);
+    uint16_t address_verification = U2BE(address_decoded, ADDRESS_DECODED_LENGTH - 2);
 
     if (flag & NON_BOUNCEABLE) {
         PRINTF("Setting mode NON_BOUNCEABLE\n");
@@ -121,7 +131,7 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
 
-    uint16_t calculated_address_verification = crc16(address_decoded, 34);
+    uint16_t calculated_address_verification = crc16(address_decoded, ADDRESS_DECODED_LENGTH - 2);
     if (calculated_address_verification != address_verification) {
         PRINTF("Wrong address verification: calculated %d, received %d\n",
                calculated_address_verification,
