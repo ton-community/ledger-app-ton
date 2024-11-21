@@ -21,12 +21,12 @@ bool address_to_friendly(const uint8_t chain,
 
     // Address Tag
     if (bounceable) {
-        out[0] = 0x11;  // Bounceable
+        out[0] = BOUNCEABLE;
     } else {
-        out[0] = 0x51;  // Non-Bounceable
+        out[0] = NON_BOUNCEABLE;
     }
     if (testOnly) {
-        out[0] = out[0] | 0x80;
+        out[0] = out[0] | TESTNET_ONLY;
     }
 
     // Workchain

@@ -402,6 +402,7 @@ bool process_hints(transaction_t* tx) {
                                                        &master,
                                                        jettons[jetton_id].state_assembler_idx));
 
+                // TODO: implem Jetton swap
                 if (memcmp(state_init.hash, G_context.tx_info.transaction.to.hash, 32) != 0) {
                     return false;
                 }

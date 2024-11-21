@@ -61,6 +61,10 @@
  */
 #define SW_SIGNATURE_FAIL 0xB008
 /**
+ * Status word for a failed swap operation
+ */
+#define SW_SWAP_FAILURE 0xB009
+/**
  * Status word for a request that is too long.
  */
 #define SW_REQUEST_TOO_LONG 0xB00B
