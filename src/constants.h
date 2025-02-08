@@ -51,6 +51,11 @@
 #define MAX_VALUE_BYTES_LEN 15
 
 /**
+ * Max bytes allowed in TON's conventional encoding for extra currency amount.
+ */
+#define MAX_EXTRA_CURRENCY_AMOUNT_BYTES_LEN 31
+
+/**
  * Max ticker string length.
  */
 #define MAX_TICKER_LEN 16

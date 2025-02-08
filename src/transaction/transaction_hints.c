@@ -368,7 +368,7 @@ bool process_hints(transaction_t* tx) {
                 uint16_t jetton_id;
                 SAFE(buffer_read_u16(&buf, &jetton_id, BE));
 
-                if (jetton_id > sizeof(jettons) / sizeof(jettons[0])) {
+                if (jetton_id >= sizeof(jettons) / sizeof(jettons[0])) {
                     return false;
                 }
 
@@ -388,7 +388,7 @@ bool process_hints(transaction_t* tx) {
 
                 SAFE(pubkey_to_hash(pubkey,
                                     G_context.tx_info.transaction.subwallet_id,
-                                    !G_context.tx_info.transaction.include_wallet_op,
+                                    !transaction_include_wallet_op(&G_context.tx_info.transaction),
                                     owner.hash,
                                     sizeof(owner.hash)));
 

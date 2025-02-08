@@ -25,7 +25,7 @@ typedef struct {
 
 typedef struct {
     char ticker[MAX_TICKER_LEN + 1];
-    uint8_t value[MAX_VALUE_BYTES_LEN];
+    uint8_t value[MAX_EXTRA_CURRENCY_AMOUNT_BYTES_LEN];
     uint8_t value_len;
     uint8_t decimals;
 } Amount_t;

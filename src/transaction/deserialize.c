@@ -29,6 +29,20 @@
         return CODE;    \
     }
 
+typedef struct {
+    uint32_t id;
+    char name[8];
+    uint8_t decimals;
+} extra_currency_t;
+
+static const extra_currency_t extra_currencies[] = {
+    {
+        .id = 0,
+        .name = "tgBTC",
+        .decimals = 9,
+    },
+};
+
 parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
     if (buf->size > MAX_TRANSACTION_LEN) {
         return WRONG_LENGTH_ERROR;
@@ -44,10 +58,10 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
 
     if (tx->tag == 0x01) {
         SAFE(buffer_read_u32(buf, &tx->subwallet_id, BE), GENERAL_ERROR);
-        SAFE(buffer_read_bool(buf, &tx->include_wallet_op), GENERAL_ERROR);
+        SAFE(buffer_read_u8(buf, &tx->flags), GENERAL_ERROR);
     } else {
         tx->subwallet_id = DEFAULT_SUBWALLET_ID;
-        tx->include_wallet_op = true;
+        tx->flags = TX_INCLUDE_WALLET_OP_BIT;
     }
 
     // Basic Transaction parameters
@@ -55,6 +69,19 @@ parser_status_e transaction_deserialize(buffer_t *buf, transaction_t *tx) {
     SAFE(buffer_read_u32(buf, &tx->timeout, BE), TIMEOUT_PARSING_ERROR);
     SAFE(buffer_read_varuint(buf, &tx->value_len, tx->value_buf, MAX_VALUE_BYTES_LEN),
          VALUE_PARSING_ERROR);
+    if (transaction_include_extra_currency(tx)) {
+        uint8_t ec_idx;
+        SAFE(buffer_read_u8(buf, &ec_idx), EXTRA_CURRENCY_PARSING_ERROR);
+        if (ec_idx >= sizeof(extra_currencies) / sizeof(extra_currencies[0])) {
+            return EXTRA_CURRENCY_PARSING_ERROR;
+        }
+
+        tx->extra_currency_id = extra_currencies[ec_idx].id;
+        SAFE(buffer_read_varuint(buf, &tx->extra_currency_amount_len, tx->extra_currency_amount_buf, MAX_EXTRA_CURRENCY_AMOUNT_BYTES_LEN),
+             EXTRA_CURRENCY_PARSING_ERROR);
+
+        add_hint_amount(&tx->hints, "Extra currency", extra_currencies[ec_idx].name, tx->extra_currency_amount_buf, tx->extra_currency_amount_len, extra_currencies[ec_idx].decimals);
+    }
     SAFE(buffer_read_address(buf, &tx->to), TO_PARSING_ERROR);
     SAFE(buffer_read_bool(buf, &tx->bounce), BOUNCE_PARSING_ERROR);
     SAFE(buffer_read_u8(buf, &tx->send_mode), SEND_MODE_PARSING_ERROR);

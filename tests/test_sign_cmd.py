@@ -1,6 +1,6 @@
 import pytest
 
-from application_client.ton_transaction import Transaction, SendMode, CommentPayload, Payload, JettonTransferPayload, NFTTransferPayload, CustomUnsafePayload, JettonBurnPayload, AddWhitelistPayload, SingleNominatorWithdrawPayload, ChangeValidatorPayload, TonstakersDepositPayload, JettonDAOVotePayload, ChangeDNSWalletPayload, ChangeDNSPayload, TokenBridgePaySwapPayload
+from application_client.ton_transaction import Transaction, StateInit, SendMode, ExtraCurrency, CommentPayload, Payload, JettonTransferPayload, NFTTransferPayload, CustomUnsafePayload, JettonBurnPayload, AddWhitelistPayload, SingleNominatorWithdrawPayload, ChangeValidatorPayload, TonstakersDepositPayload, JettonDAOVotePayload, ChangeDNSWalletPayload, ChangeDNSPayload, TokenBridgePaySwapPayload
 from application_client.ton_command_sender import BoilerplateCommandSender, Errors
 from application_client.ton_response_unpacker import unpack_sign_tx_response
 from ragger.error import ExceptionRAPDU
@@ -97,6 +97,84 @@ def test_sign_tx_blind_error(firmware, backend, navigator, test_name):
 
     assert e.value.status == Errors.SW_BLIND_SIGNING_DISABLED
     assert len(e.value.data) == 0
+
+
+def test_sign_tx_with_state_init(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = BoilerplateCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/607'/0'/0'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    pubkey = client.get_public_key(path=path).data
+
+    tx = Transaction(Address("0:" + "0" * 64), SendMode.PAY_GAS_SEPARATLY, 0, 1686176000, True, 100000000, state_init=StateInit(Cell(), Cell()), payload=CommentPayload("test"))
+    tx_bytes = tx.to_request_bytes()
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=tx_bytes):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                        [NavInsID.BOTH_CLICK],
+                                                        "Approve",
+                                                        ROOT_SCREENSHOT_PATH,
+                                                        test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                        [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                        NavInsID.USE_CASE_STATUS_DISMISS],
+                                                        "Hold to sign",
+                                                        ROOT_SCREENSHOT_PATH,
+                                                        test_name,
+                                                        screen_change_before_first_instruction=False)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    sig, hash_b = unpack_sign_tx_response(response)
+    assert hash_b == tx.transfer_cell().bytes_hash()
+    assert check_signature_validity(pubkey, sig, hash_b)
+
+
+def test_sign_tx_with_extra_currency(firmware, backend, navigator, test_name):
+    # Use the app interface instead of raw interface
+    client = BoilerplateCommandSender(backend)
+    # The path used for this entire test
+    path: str = "m/44'/607'/0'/0'/0'/0'"
+
+    # First we need to get the public key of the device in order to build the transaction
+    pubkey = client.get_public_key(path=path).data
+
+    tx = Transaction(Address("0:" + "0" * 64), SendMode.PAY_GAS_SEPARATLY, 0, 1686176000, True, 100000000, extra_currency=ExtraCurrency(0, 100000000), payload=CommentPayload("test"))
+    tx_bytes = tx.to_request_bytes()
+
+    # Send the sign device instruction.
+    # As it requires on-screen validation, the function is asynchronous.
+    # It will yield the result when the navigation is done
+    with client.sign_tx(path=path, transaction=tx_bytes):
+        # Validate the on-screen request by performing the navigation appropriate for this device
+        if firmware.device.startswith("nano"):
+            navigator.navigate_until_text_and_compare(NavInsID.RIGHT_CLICK,
+                                                        [NavInsID.BOTH_CLICK],
+                                                        "Approve",
+                                                        ROOT_SCREENSHOT_PATH,
+                                                        test_name)
+        else:
+            navigator.navigate_until_text_and_compare(NavInsID.USE_CASE_VIEW_DETAILS_NEXT,
+                                                        [NavInsID.USE_CASE_REVIEW_CONFIRM,
+                                                        NavInsID.USE_CASE_STATUS_DISMISS],
+                                                        "Hold to sign",
+                                                        ROOT_SCREENSHOT_PATH,
+                                                        test_name,
+                                                        screen_change_before_first_instruction=False)
+
+    # The device as yielded the result, parse it and ensure that the signature is correct
+    response = client.get_async_response().data
+    sig, hash_b = unpack_sign_tx_response(response)
+    assert hash_b == tx.transfer_cell().bytes_hash()
+    assert check_signature_validity(pubkey, sig, hash_b)
 
 
 def test_sign_tx_with_payload(firmware, backend, navigator, test_name):

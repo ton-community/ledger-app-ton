@@ -30,10 +30,13 @@ We shall also have another format for cells - 1 byte for length in bytes (n) and
 | --- | :---: | --- |
 | `tag` | 1 | 0x00 for app versions <2.1.0, 0x00 or 0x01 for app versions >=2.1.0. Higher values enable more features |
 | `subwallet_id` | 0 or 4 | Subwallet id. Only present when `tag == 0x01` |
-| `include_wallet_op` | 0 or 1 | Whether to include the 8-bit wallet op (0x01 to include, 0x00 to not include). Only present when `tag == 0x01` |
+| `flags` | 0 or 1 | Bit 0 (least significant) signifies whether to include the 8-bit wallet op in the transaction (when set, the op is included). Bit 1 signifies whether to include an extra currency (when set, the extra currency is included). Bit 1 may only be used with app versions >=2.4.0. Only present when `tag == 0x01` |
 | `seqno` | 4 | A sequence number used to prevent message replay |
 | `timeout` | 4 | Message timeout |
 | `value` | `varuint` | The amount in nanotons to send to the destination address encoded as described above |
+| `extra_currency_index` | 0 or 1 | The index of the extra currency to send to the destination address. Only present when `flags & 1` |
+| `extra_currency_amount` | 0 or `varuint` | The amount of the extra currency to send to the destination address. Only present when `flags & 1` |
+| `to` | `address` | The destination address |
 | `bounce` | 1 | 0x01 or 0x00 for bounce flag |
 | `send_mode` | 1 | Send mode of the message |
 | `has_state_init` | 1 | 0x01 if state init is present |

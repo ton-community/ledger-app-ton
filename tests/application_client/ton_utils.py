@@ -11,10 +11,13 @@ TON_PROOF_PREFIX   = b"ton-proof-item-v2/"
 TON_CONNECT_PREFIX = b"\xff\xffton-connect"
 
 
-def write_varuint(n: int) -> bytes:
+def bytelen(n: int) -> int:
     bitlen = len(bin(n)) - 2
-    bytelen = ceil(bitlen / 8)
-    return b"".join([bytes([bytelen]), n.to_bytes(bytelen, byteorder="big")])
+    return ceil(bitlen / 8)
+
+
+def write_varuint(n: int) -> bytes:
+    return b"".join([bytes([bytelen(n)]), n.to_bytes(bytelen(n), byteorder="big")])
 
 
 def write_address(addr: Address) -> bytes:

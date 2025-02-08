@@ -6,7 +6,7 @@ from abc import ABC, abstractmethod
 from tonsdk.utils import Address
 from tonsdk.boc import Cell
 
-from .ton_utils import write_varuint, write_address, write_cell
+from .ton_utils import write_varuint, write_address, write_cell, bytelen
 from .my_builder import begin_cell
 
 
@@ -33,6 +33,12 @@ class StateInit:
             .store_uint(0, 1)
             .end_cell()
         )
+
+
+@dataclass
+class ExtraCurrency:
+    index: int
+    amount: int
 
 
 class Payload(ABC):
@@ -595,7 +601,8 @@ class Transaction:
                  state_init: Optional[StateInit] = None,
                  payload: Optional[Payload] = None,
                  subwallet_id: Optional[int] = None,
-                 include_wallet_op: bool = True) -> None:
+                 include_wallet_op: bool = True,
+                 extra_currency: Optional[ExtraCurrency] = None) -> None:
         self.to: Address = to
         self.send_mode: SendMode = send_mode
         self.seqno: int = seqno
@@ -606,19 +613,34 @@ class Transaction:
         self.payload: Optional[Payload] = payload
         self.subwallet_id: Optional[int] = subwallet_id
         self.include_wallet_op: bool = include_wallet_op
+        self.extra_currency: Optional[ExtraCurrency] = extra_currency
 
     def header_bytes(self) -> bytes:
-        if not self.include_wallet_op or self.subwallet_id is not None:
+        if not self.include_wallet_op or self.subwallet_id is not None or self.extra_currency is not None:
+            flags = 0
+            if self.include_wallet_op:
+                flags |= 1
+            if self.extra_currency is not None:
+                flags |= 2
             return b"".join([
                 bytes([1]),
                 (
                     (self.subwallet_id if self.subwallet_id is not None else 698983191)
                     .to_bytes(4, byteorder="big")
                 ),
-                bytes([1 if self.include_wallet_op else 0])
+                bytes([flags])
             ])
 
         return bytes([0])
+
+    def extra_currency_bytes(self) -> bytes:
+        if self.extra_currency is None:
+            return bytes([])
+
+        return b"".join([
+            bytes([self.extra_currency.index]),
+            write_varuint(self.extra_currency.amount),
+        ])
 
     def to_request_bytes(self) -> bytes:
         return b"".join([
@@ -626,6 +648,7 @@ class Transaction:
             self.seqno.to_bytes(4, byteorder="big"),
             self.timeout.to_bytes(4, byteorder="big"),
             write_varuint(self.amount),
+            self.extra_currency_bytes(),
             write_address(self.to),
             bytes([1 if self.bounce else 0]),
             bytes([self.send_mode]),
@@ -666,8 +689,17 @@ class Transaction:
             .store_uint(0, 3)
             .store_address(self.to)
             .store_coins(self.amount)
-            .store_uint(0, 1 + 4 + 4 + 64 + 32)
+            .store_uint(1 if self.extra_currency is not None else 0, 1)
+            .store_uint(0, 4 + 4 + 64 + 32)
         )
+        if self.extra_currency is not None:
+            b = b.store_ref(begin_cell()
+                                .store_uint(0b10, 2)
+                                .store_uint(32, 6)
+                                .store_uint(self.extra_currency.index, 32)
+                                .store_uint(bytelen(self.extra_currency.amount), 5)
+                                .store_uint(self.extra_currency.amount, bytelen(self.extra_currency.amount) * 8)
+                                .end_cell())
         if self.state_init is None:
             b = b.store_bit(0)
         else:
