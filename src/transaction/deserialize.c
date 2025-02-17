@@ -37,9 +37,9 @@ typedef struct {
 
 static const extra_currency_t extra_currencies[] = {
     {
-        .id = 0,
+        .id = 1,
         .name = "tgBTC",
-        .decimals = 9,
+        .decimals = 8,
     },
 };
 
