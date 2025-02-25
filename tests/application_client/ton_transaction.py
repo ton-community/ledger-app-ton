@@ -38,6 +38,7 @@ class StateInit:
 @dataclass
 class ExtraCurrency:
     index: int
+    id: int
     amount: int
 
 
@@ -696,7 +697,7 @@ class Transaction:
             b = b.store_ref(begin_cell()
                                 .store_uint(0b10, 2)
                                 .store_uint(32, 6)
-                                .store_uint(self.extra_currency.index, 32)
+                                .store_uint(self.extra_currency.id, 32)
                                 .store_uint(bytelen(self.extra_currency.amount), 5)
                                 .store_uint(self.extra_currency.amount, bytelen(self.extra_currency.amount) * 8)
                                 .end_cell())

@@ -147,7 +147,7 @@ def test_sign_tx_with_extra_currency(firmware, backend, navigator, test_name):
     # First we need to get the public key of the device in order to build the transaction
     pubkey = client.get_public_key(path=path).data
 
-    tx = Transaction(Address("0:" + "0" * 64), SendMode.PAY_GAS_SEPARATLY, 0, 1686176000, True, 100000000, extra_currency=ExtraCurrency(0, 100000000), payload=CommentPayload("test"))
+    tx = Transaction(Address("0:" + "0" * 64), SendMode.PAY_GAS_SEPARATLY, 0, 1686176000, True, 100000000, extra_currency=ExtraCurrency(0, 1, 100000000), payload=CommentPayload("test"))
     tx_bytes = tx.to_request_bytes()
 
     # Send the sign device instruction.
