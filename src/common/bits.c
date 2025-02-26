@@ -50,7 +50,7 @@ void BitString_storeCoins(BitString_t* self, uint64_t v) {
     }
 }
 
-void BitString_storeCoinsBuf(BitString_t* self, uint8_t* v, uint8_t len) {
+void BitString_storeCoinsBuf(BitString_t* self, const uint8_t* v, uint8_t len) {
     // Write length
     BitString_storeUint(self, len, 4);
 
@@ -64,7 +64,7 @@ void BitString_storeBuffer(BitString_t* self, const uint8_t* v, uint8_t length) 
     }
 }
 
-void BitString_storeAddress(BitString_t* self, uint8_t chain, uint8_t* hash) {
+void BitString_storeAddress(BitString_t* self, uint8_t chain, const uint8_t* hash) {
     BitString_storeUint(self, 2, 2);
     BitString_storeUint(self, 0, 1);
     BitString_storeUint(self, chain, CHAIN_LEN * 8);
