@@ -13,6 +13,8 @@
 #include "constants.h"
 #include "crc16.h"
 
+#include "../jetton.h"
+
 #define BASE_CHAIN             0x00
 #define MASTER_CHAIN           0xFF
 #define ADDRESS_BASE64_LENGTH  48
@@ -206,9 +208,31 @@ out:
     return ret;
 }
 
+#if defined(HAVE_HARDCODED_JETTONS)
+static bool swap_get_jetton_wallet_address(const char *ticker, uint8_t *hash) {
+    bool ret = false;
+    address_t owner = {0};
+    address_t jetton_wallet;
+
+    memcpy(owner.hash, hash, HASH_LEN);
+
+    ret = jetton_get_wallet_address_by_name(ticker, &owner, &jetton_wallet);
+    if (!ret) {
+        goto out;
+    }
+
+    memcpy(hash, jetton_wallet.hash, HASH_LEN);
+
+out:
+    return ret;
+}
+#endif
+
 /* Set params.result to 0 on error, 1 otherwise */
 void swap_handle_check_address(check_address_parameters_t *params) {
+    uint8_t decimals __attribute__((unused));
     uint8_t hash[HASH_LEN] = {0};
+    char ticker[MAX_SWAP_TOKEN_LENGTH] = {0};
 
     PRINTF("Inside Ton swap_handle_check_address\n");
 
@@ -231,7 +255,33 @@ void swap_handle_check_address(check_address_parameters_t *params) {
         return;
     }
 
-    PRINTF("hash %.*H\n", HASH_LEN, hash);
+    PRINTF("this wallet account hash %.*H\n", HASH_LEN, hash);
+
+    if (params->coin_configuration == NULL) {
+        PRINTF("No coin configuration, defaulting to TON\n");
+        memcpy(ticker, "TON", sizeof("TON"));
+    } else {
+        if (!swap_parse_config(params->coin_configuration,
+                               params->coin_configuration_length,
+                               ticker,
+                               sizeof(ticker),
+                               &decimals)) {
+            PRINTF("Fail to parse coin_configuration\n");
+            return;
+        } else {
+            PRINTF("ticker read from swap config %s\n", ticker);
+        }
+    }
+
+#if defined(HAVE_HARDCODED_JETTONS)
+    /* if ticker different from `TON`, address to check is a jetton wallet address */
+    if (strncmp(ticker, "TON", sizeof("TON")) != 0) {
+        if (!swap_get_jetton_wallet_address(ticker, hash)) {
+            return;
+        }
+    }
+#endif
+
 
     if (!swap_check_address_consistency(params, hash)) {
         return;

@@ -98,3 +98,5 @@
 #define BOUNCEABLE     0x11
 #define NON_BOUNCEABLE 0x51
 #define TESTNET_ONLY   0x80
+
+#define MAX_SWAP_TOKEN_LENGTH 15

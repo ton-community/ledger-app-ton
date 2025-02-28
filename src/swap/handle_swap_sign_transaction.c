@@ -136,19 +136,21 @@ bool swap_check_validity() {
         os_sched_exit(0);
     }
 
-    if (G_context.tx_info.transaction.hints_type != TRANSACTION_COMMENT) {
-        PRINTF("Wrong operation %d\n", G_context.tx_info.transaction.hints_type);
-        io_send_sw(SW_SWAP_FAILURE);
-        // unreachable
-        os_sched_exit(0);
-    } else if (G_context.tx_info.transaction.hints_len != 0) {
+    if ((G_context.tx_info.transaction.hints_type == TRANSACTION_COMMENT)
+     && (G_context.tx_info.transaction.hints_len != 0)) {
         PRINTF("Hint length %d refused\n", G_context.tx_info.transaction.hints_len);
         io_send_sw(SW_SWAP_FAILURE);
         // unreachable
         os_sched_exit(0);
-    } else {
-        PRINTF("Valid operation %d\n", G_context.tx_info.transaction.hints_type);
+    } else if ((G_context.tx_info.transaction.hints_type != TRANSACTION_COMMENT)
+            && (G_context.tx_info.transaction.hints_type != TRANSACTION_TRANSFER_JETTON)) {
+        PRINTF("Wrong operation %d\n", G_context.tx_info.transaction.hints_type);
+        io_send_sw(SW_SWAP_FAILURE);
+        // unreachable
+        os_sched_exit(0);
     }
+
+    PRINTF("Valid operation %d\n", G_context.tx_info.transaction.hints_type);
 
     if (G_context.tx_info.transaction.send_mode & 128) {
         PRINTF("Amount MAX is refused\n");
@@ -183,8 +185,24 @@ bool swap_check_validity() {
 
     char encoded_address[G_ADDRESS_LEN];
     uint8_t decoded_address[ADDRESS_LEN] = {0};
-    if (!address_to_friendly(G_context.tx_info.transaction.to.chain,
-                             G_context.tx_info.transaction.to.hash,
+    address_t *recipient = NULL;
+
+    /*
+     *  XXX:
+     *   In case of Jetton transfer, transaction `to` address is the sender jetton wallet address.
+     *   Recipent address is the second hints in message hints.
+     */
+
+    if (G_context.tx_info.transaction.hints_type == TRANSACTION_TRANSFER_JETTON) {
+        if (G_context.tx_info.transaction.hints.hints_count >= 2) {
+            recipient = &G_context.tx_info.transaction.hints.hints[1].address.address;
+        }
+    } else {
+        recipient = &G_context.tx_info.transaction.to;
+    }
+
+    if (!address_to_friendly(recipient->chain,
+                             recipient->hash,
                              G_context.tx_info.transaction.bounce,
                              false,
                              decoded_address,
