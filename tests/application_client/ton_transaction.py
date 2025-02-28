@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import IntFlag, IntEnum
-from typing import Optional
+from typing import Optional, Union
 from abc import ABC, abstractmethod
 
 from tonsdk.utils import Address
@@ -229,11 +229,11 @@ class JettonBurnPayload(Payload):
                  amount: int,
                  response_destination: Address,
                  query_id: Optional[int] = None,
-                 custom_payload: Optional[Cell | bytes] = None) -> None:
+                 custom_payload: Optional[Union[Cell, bytes]] = None) -> None:
         self.query_id: int = query_id if query_id is not None else 0
         self.amount: int = amount
         self.response_destionation: Address = response_destination
-        self.custom_payload: Optional[Cell | bytes] = custom_payload
+        self.custom_payload: Optional[Union[Cell, bytes]] = custom_payload
 
     def to_request_bytes(self) -> bytes:
         main_body = b"".join([

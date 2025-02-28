@@ -7,10 +7,10 @@ def check_version(root_path: Path, target_version: str):
     """Extract and check if the version in the Makefile matches the target version."""
     version_re = re.compile(r"^APPVERSION_(?P<part>[MNP])\s*=\s*(?P<val>\d+)", re.I)
     vers_dict = {}
-    makefile = f"{root_path.parent.resolve()}/Makefile"
+    makefile = root_path.parent.resolve() / "Makefile"
 
     # Read the file and extract the version
-    with open(makefile, "r", encoding="utf-8") as f:
+    with makefile.open("r", encoding="utf-8") as f:
         for line in f:
             match = version_re.match(line)
             if match:
@@ -26,7 +26,7 @@ def check_version(root_path: Path, target_version: str):
         raise ValueError("The version in the Makefile is incomplete.")
 
     extracted_version = f"{major}.{minor}.{patch}"
-   
+
     print(f"Makefile version: {extracted_version}, Target version: {target_version}")
     assert extracted_version == target_version
 
@@ -41,4 +41,3 @@ def test_get_app_and_version(backend, default_screenshot_path):
 
     check_version(default_screenshot_path, version)
     assert app_name == "TON"
-
